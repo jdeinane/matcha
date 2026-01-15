@@ -17,19 +17,24 @@ const schema = `
 		first_name TEXT NOT NULL,
 		last_name TEXT NOT NULL,
 		password_hash TEXT NOT NULL,
+
+		-- VALIDATION AND SECURITY
 		is_verified INTEGER NOT NULL DEFAULT 0,
 		verify_token TEXT,
+		verify_token_expires_at TEXT,
 		reset_token TEXT,
+		reset_token_expires_at TEXT,
 
 		-- EXTENDED PROFILE
-		gender TEXT,
-		sexual_preference TEXT DEFAULT 'bisexual',
+		birthdate TEXT,
+		gender TEXT CHECK(gender IN ('male', 'female', 'other')),
+		sexual_preference TEXT DEFAULT 'bisexual' CHECK(sexual_preference IN ('heterosexual', 'gay', 'bisexual')),
 		biography TEXT,
 		fame_rating REAL DEFAULT 0,
 	
-		-- LOCALISATION
-		latitude REAL,
-		longitude REAL,
+		-- LOCALIZATION
+		latitude REAL CHECK(latitude >= -90 AND latitude <= 90),
+		longitude REAL CHECK(longitude >= -180 AND longitude <= 180),
 		city TEXT,
 		manual_location INTEGER DEFAULT 0,
 

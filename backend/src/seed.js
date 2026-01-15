@@ -1,5 +1,5 @@
 import { db } from "./db.js";
-import { fakerFR as faker } from "@faker-js/faker";
+import { faker } from "@faker-js/faker";
 import bcrypt from "bcrypt";
 
 const USERS_COUNT = 500;
@@ -47,8 +47,8 @@ const runSeed = async () => {
 		INSERT INTO users (
 			email, username, first_name, last_name, password_hash,
 			is_verified, gender, sexual_preference, biography,
-			fame_rating, latitude, longitude, city, created_at
-		) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+			fame_rating, latitude, longitude, city, birthdate, created_at
+		) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 	`);
 
 	const insertImage = db.prepare("INSERT INTO images (user_id, file_path, is_profile_pic) VALUES (?, ?, ?)");
@@ -59,12 +59,13 @@ const runSeed = async () => {
 	console.log(`Generating ${USERS_COUNT} users...`);
 
 		for (let i = 0; i < USERS_COUNT; i++) {
+		const birthdate = faker.date.birthdate({ min: 18, max: 60, mode: 'age' }).toISOString().split('T')[0];
 			const sex = faker.person.sexType();
 			const firstName = faker.person.firstName(sex);
 			const lastName = faker.person.lastName();
 			const username = faker.internet.username({ firstName, lastName }) + Math.floor(Math.random() * 1000);
 			const email = faker.internet.email({ firstName, lastName });
-			const location = faker.location.nearbyGPSCoordinate({ origin: [48.8566, 2.3522], radius: 10, isMetric: true });
+			const location = faker.location.nearbyGPSCoordinate({ origin: [48.8566, 2.3522], radius: 10, isMetric: true }); // Paris area
 			const userResult = insertUser.run(
 				email,
 				username,
@@ -79,6 +80,7 @@ const runSeed = async () => {
 				location[0], // lat
 				location[1], //lon
 				"Paris",
+				birthdate,
 				faker.date.past().toISOString()
 			);
 			const userId = userResult.lastInsertRowid;
