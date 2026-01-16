@@ -2,9 +2,13 @@ import express from "express";
 import helmet from "helmet";
 import cors from "cors";
 import cookieParser from "cookie-parser";
-import authRoutes from "./routes/auth.js";
 import rateLimit from "express-rate-limit";
 import morgan from "morgan";
+import path from "path";
+
+import authRoutes from "./routes/auth.js";
+import userRoutes from "./routes/users.js";
+import browsingRoutes from "./routes/browsing.js";
 
 if (!process.env.JWT_SECRET && process.env.NODE_ENV === 'production') {
 	console.error("❌ FATAL: JWT_SECRET missing in production.");
@@ -36,15 +40,19 @@ export function createApp() {
 		methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
 	}));
 
+	app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
+
 	app.use("/api/auth", authRoutes);
+
+	app.use("/api/browsing", browsingRoutes);
+
+	app.get("/api/health", (req, res) => {
+		res.json({ status: "ok", message: "Backend is running!" });
+	});
 
 	app.use((err, req, res, next) => {
 		console.error("Unhandled error:", err);
 		res.status(500).json({ error: "Internal Server Error" });
-	});
-
-	app.get("/api/health", (req, res) => {
-		res.json({ status: "ok", message: "Backend is running!" });
 	});
 
 	return app;
