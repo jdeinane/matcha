@@ -2,7 +2,7 @@ import express from "express";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { db } from "../db.js";
-import { registerSchema, loginSchema } from "../schemas.js";
+import { registerSchema, loginSchema, forgotPasswordSchema, resetPasswordSchema } from "../schemas.js";
 import crypto from "crypto";
 
 const router = express.Router();
@@ -53,7 +53,7 @@ router.post("/register", async (req, res) => {
 		// TODO: remplacer ca avec un vrai envoi d'email (avec Nodemailer)
 		console.log(`Email Simulation : http://localhost:5173/verify/${verifyToken}`);
 
-		res.status(201).json({ message: "Successfully registered! Please verify your emails."});
+		res.status(201).json({ message: "Successfully registered! Please verify your email."});
 	
 	} catch (error) {
 		if (error.issues) {
@@ -151,6 +151,77 @@ router.get("/me", (req, res) => {
 	
 	} catch (err) {
 		res.status(401).json({ authenticated: false });
+	}
+});
+
+/* FORGOT PASSWORD */
+router.post("/forgot-password", (req, res) => {
+	try {
+		const { email } = forgotPasswordSchema.parse(req.body);
+
+		const user = db.prepare("SELECT id FROM users WHERE email = ?").get(email);
+		if (!user)
+			return res.json({ message: "If this email exists, a reset link has been sent."});
+
+		// 1. Generer un token temp
+		const resetToken = crypto.randomBytes(32).toString("hex");
+
+		// 2. Sauvegarder le token DB avec expiration
+		const updateToken = db.prepare(`
+			UPDATE users
+			SET reset_token = ?, reset_token_expires_at = datetime('now', '+1 hour)
+			WHERE id = ?
+		`)
+		updateToken.run(resetToken, user.id);
+
+		// 3. Envoyer l'email (SIMULATION PR L'INSTANT)
+		// TODO: remplacer par Nodemailer
+		const resetLink = `http://localhost:5173/reset-password/${resetToken}`;
+		console.log(`🔗 RESET LINK (Email simulation): ${resetLink}`);
+
+		res.json({ message: "If this email exists, a reset link has been sent." });
+
+	} catch (error) {
+		if (error.issues)
+			return res.status(400).json({ error: error.issues[0].message });
+		console.error(error);
+		res.status(500).json({ error: "Server error" });
+	}
+});
+
+/* RESET PASSWORD */
+router.post("/reset-password", async (req, res) => {
+	try {
+		const { token, newPassword } = resetPasswordSchema.parse(req.body);
+
+		// 1. Trouver le user avec ce token valide et non expire
+		const user = db.prepare(`
+			SELECT id FROM users
+			WHERE reset_token = ?
+			AND reset_token_expires_at > datetime('now')
+		`).get(token);
+
+		if (!user)
+			return res.status(400).json({ error: "Invalid or expired token." });
+
+		// 2. Hacher le nouveau MDP
+		const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+		// 3. Mettre a jour et nettoyer les tokens
+		const updatePwd = db.prepare(`
+			UPDATE users
+			SET password_hash = ?, reset_token = NULL, reset_token_expires_at = NULL
+			WHERE id = ?
+		`)
+		updatePwd.run(hashedPassword, user.id);
+
+		res.json({ message: "Password successfully reset. You can now login."});
+
+	} catch (error) {
+		if (error.issues)
+			return res.status(400).json({ error: error.issues[0].message });
+		console.error(error);
+		res.status(500).json({ error: "Server error" });
 	}
 });
 

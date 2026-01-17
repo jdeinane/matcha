@@ -5,6 +5,7 @@ import multer from "multer";
 import path from "path";
 import fs from "fs";
 import { verifyToken } from "../middlewares/authMiddleware.js";
+import { updateAccountSchema } from "../schemas.js";
 
 const router = express.Router();
 
@@ -196,6 +197,54 @@ router.put("/photos/:id/profile", (req, res) => {
 		res.json({ message: "Profile picture updated" });
 
 	} catch (error) {
+		res.status(500).json({ error: "Server error" });
+	}
+});
+
+/* PUT ACCOUNT INFO */
+router.put("/account", (req, res) => {
+	try {
+		const { email, first_name, last_name } = updateAccountSchema.parse(req.body);
+		const currentUserId = req.user.id;
+
+		// 1. Verifier si l'email est deja pris par un autre user
+		if (email) {
+			const emailExists = db.prepare("SELECT id FROM users WHERE email = ? AND id != ?").get(email, currentUserId);
+			if (emailExists)
+				return res.status(409).json({ error: "Email already in use."});
+		}
+
+		// 2. Construire la requete dynamique (on update que ce qui est envoye)
+		const updates = [];
+		const params = [];
+
+		if (email) {
+			updates.push("email = ?");
+			params.push(email);
+		}
+		if (first_name) {
+			updates.push("first_name = ?");
+			params.push(first_name);
+		}
+		if (last_name) {
+			updates.push("last_name = ?");
+			params.push(last_name);
+		}
+
+		if (updates.length === 0)
+			return res.json({ message: "Nothing to update." });
+
+		params.push(currentUserId);
+
+		const query = `UPDATE users SET ${updates.join(", ")} WHERE id = ?`;
+		db.prepare(query).run(...params);
+
+		res.json({ message: "Account details updated successfully." });
+
+	} catch (error) {
+		if (error.issues)
+			return res.status(400).json({ error: error.issues[0].message });
+		console.error(error);
 		res.status(500).json({ error: "Server error" });
 	}
 });
