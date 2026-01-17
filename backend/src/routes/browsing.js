@@ -1,6 +1,7 @@
 import express from "express";
 import { db } from "../db.js";
 import { verifyToken } from "../middlewares/authMiddleware.js";
+import { notifyUser, isUserOnline } from "../socket.js";
 
 const router = express.Router();
 
@@ -135,7 +136,7 @@ router.get("/search", (req, res) => {
 			WHERE u.id != ?
 			AND u.is_verified = 1
 			AND u.id NOT IN (SELECT blocked_id FROM blocks WHERE blocker_id = ?)
-		`).all(currentUserId, currentUserId, currentUserId);
+		`).all(currentUserId, currentUserId);
 
 		const filtered = users.map(user => {
 			const age = calculateAge(user.birthdate);
@@ -196,6 +197,8 @@ router.get("/user/:id", (req, res) => {
 		user.is_liked = !!like;
 		user.is_match = !!(like && likedBack); 
 
+		user.is_online = isUserOnline(targetId);
+
 		// 4. Enregistrer la visite (historique)
 		// On verifie si une visite recente existe deja pour pas spam la DB
 		const existingVisit = db.prepare("SELECT id FROM visits WHERE visitor_id = ? AND visited_id = ? AND created_at > datetime('now', '-1 hour')").get(visitorId, targetId);
@@ -203,6 +206,9 @@ router.get("/user/:id", (req, res) => {
 		if (!existingVisit && visitorId != targetId) {
 			db.prepare("INSERT INTO visits (visitor_id, visited_id) VALUES (?, ?)").run(visitorId, targetId);
 			db.prepare("INSERT INTO notifications (recipient_id, sender_id, type) VALUES (?, ?, 'visit')").run(targetId, visitorId);
+		
+			// Socket
+			notifyUser(targetId, "notification", { type: "visit", sender_name: req.user.username });
 		}
 
 		res.json(user);

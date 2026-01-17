@@ -55,3 +55,9 @@ export const locationSchema = z.object({
 	latitude: z.number().min(-90, "Invalid latitude").max(90, "Invalid latitude"),
 	longitude: z.number().min(-180, "Invalid longitude").max(180, "Invalid longitude"),
 });
+
+
+export const messageSchema = z.object({
+	recipient_id: z.number(),
+	content: z.string().trim().min(1, "Message cannot be empty").max(1000)
+});

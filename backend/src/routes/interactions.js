@@ -1,6 +1,7 @@
 import express from "express";
 import { db } from "../db.js";
 import { verifyToken } from "../middlewares/authMiddleware.js";
+import { notifyUser } from "../socket.js";
 
 const router = express.Router();
 router.use(verifyToken);
@@ -10,6 +11,7 @@ router.post("/like/:id", (req, res) => {
 	try {
 		const targetId = parseInt(req.params.id);
 		const likerId = req.user.id;
+		const likerName = req.user.username;
 
 		if (targetId === likerId)
 			return res.status(400).json({ error: "You cannot like yourself" });
@@ -30,12 +32,19 @@ router.post("/like/:id", (req, res) => {
 			db.prepare("INSERT INTO notifications (recipient_id, sender_id, type) VALUES (?, ?, 'match')").run(targetId, likerId);
 			db.prepare("INSERT INTO notifications (recipient_id, sender_id, type) VALUES (?, ?, 'match')").run(likerId, targetId);
 			
+			// Sockets
+			notifyUser(targetId, "notification", { type: "match", sender_name:likerName });
+			notifyUser(likerId, "notification", { type: "match", sender_name: "Someone" });
+
 			return res.json({ message: "It's a match!", is_match: true });
 		} else {
 			// Juste un like simple -> Notif 'Like'
 			db.prepare("INSERT INTO notifications (recipient_id, sender_id, type) VALUES (?, ?, 'like')").run(targetId, likerId);
 			// Popularite augmente -> +5 points pour un like recu
 			db.prepare("UPDATE users SET fame_rating = fame_rating + 5 WHERE id = ?").run(targetId);
+
+			// Socket
+			notifyUser(targetId, "notification", { type: "like", sender_name: likerName });
 
 			return res.json({ message: "Liked", is_match: false });
 		}
@@ -61,6 +70,9 @@ router.delete("/like/:id", (req, res) => {
 			
 			// 3. Baisser la popularite si unliked
 			db.prepare("UPDATE users SET fame_rating = MAX(0, fame_rating - 5) WHERE id = ?").run(targetId);
+		
+			// Socket
+			notifyUser(targetId, "notification", { type: "unlike", sender_name: req.user.username });
 		}
 
 		res.json({ message: "Unliked" });

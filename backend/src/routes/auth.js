@@ -1,9 +1,11 @@
 import express from "express";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import crypto from "crypto";
+
 import { db } from "../db.js";
 import { registerSchema, loginSchema, forgotPasswordSchema, resetPasswordSchema } from "../schemas.js";
-import crypto from "crypto";
+import { sendEmail } from "../email.js";
 
 const router = express.Router();
 
@@ -50,8 +52,12 @@ router.post("/register", async (req, res) => {
 			verifyToken
 		);
 
-		// TODO: remplacer ca avec un vrai envoi d'email (avec Nodemailer)
-		console.log(`Email Simulation : http://localhost:5173/verify/${verifyToken}`);
+		const verifyLink = `http://localhost:5173/verify/${verifyToken}`;
+		await sendEmail(
+			validatedData.email, 
+			"Verify your Matcha account", 
+			`<p>Welcome! Click here to verify your account: <a href="${verifyLink}">${verifyLink}</a></p>`
+		);
 
 		res.status(201).json({ message: "Successfully registered! Please verify your email."});
 	
@@ -155,7 +161,7 @@ router.get("/me", (req, res) => {
 });
 
 /* FORGOT PASSWORD */
-router.post("/forgot-password", (req, res) => {
+router.post("/forgot-password", async (req, res) => {
 	try {
 		const { email } = forgotPasswordSchema.parse(req.body);
 
@@ -174,12 +180,13 @@ router.post("/forgot-password", (req, res) => {
 		`)
 		updateToken.run(resetToken, user.id);
 
-		// 3. Envoyer l'email (SIMULATION PR L'INSTANT)
-		// TODO: remplacer par Nodemailer
+		// 3. Envoyer l'email
 		const resetLink = `http://localhost:5173/reset-password/${resetToken}`;
-		console.log(`🔗 RESET LINK (Email simulation): ${resetLink}`);
-
-		res.json({ message: "If this email exists, a reset link has been sent." });
+		await sendEmail(
+			email,
+			"Reset your Password",
+			`<p>Click here to reset your password: <a href="${resetLink}">${resetLink}</a></p>`
+		);
 
 	} catch (error) {
 		if (error.issues)
