@@ -22,7 +22,7 @@ router.post("/register", async (req, res) => {
 		const validatedData = registerSchema.parse(req.body);
 		
 		// 2. Verifie si l'utilisateur existe deja
-		const userExists = db.prepare("SELECT id FROM users WHERE LOWER(username) = LOWER(?)").get(validatedData.username, validatedData.email);
+		const userExists = db.prepare("SELECT id FROM users WHERE LOWER(username) = LOWER(?)").get(validatedData.username);
 		if (userExists) {
 			return res.status(409).json({ error: "This username is already taken" });
 		}
@@ -175,7 +175,7 @@ router.post("/forgot-password", async (req, res) => {
 		// 2. Sauvegarder le token DB avec expiration
 		const updateToken = db.prepare(`
 			UPDATE users
-			SET reset_token = ?, reset_token_expires_at = datetime('now', '+1 hour)
+			SET reset_token = ?, reset_token_expires_at = datetime('now', '+1 hour')
 			WHERE id = ?
 		`)
 		updateToken.run(resetToken, user.id);

@@ -68,8 +68,8 @@ router.delete("/like/:id", (req, res) => {
 			// 2. Envoyer une notif "Unlike"
 			db.prepare("INSERT INTO notifications (recipient_id, sender_id, type) VALUES (?, ?, 'unlike')").run(targetId, likerId);
 			
-			// 3. Baisser la popularite si unliked
-			db.prepare("UPDATE users SET fame_rating = MAX(0, fame_rating - 5) WHERE id = ?").run(targetId);
+			// 3. Baisser la popularite si unliked (MIN 0)
+			db.prepare("UPDATE users SET fame_rating = CASE WHEN fame_rating - 5 < 0 THEN 0 ELSE fame_rating - 5 END WHERE id = ?").run(targetId);
 		
 			// Socket
 			notifyUser(targetId, "notification", { type: "unlike", sender_name: req.user.username });

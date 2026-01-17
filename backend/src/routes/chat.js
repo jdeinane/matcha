@@ -85,7 +85,7 @@ router.post("/", (req, res) => {
 		if (error.issues)
 			return res.status(400).json({ error: error.issues[0].message });
 		console.error(error);
-		res.status(500).json({ error: "Server error "});
+		res.status(500).json({ error: "Server error" });
 	}
 });
 
