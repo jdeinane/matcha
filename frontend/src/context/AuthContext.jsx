@@ -45,9 +45,17 @@ export const AuthProvider = ({ children }) => {
 		}
 	};
 
+	if (loading) {
+		return (
+			<div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+				<h2>Chargement de l'application... (Vérification Auth)</h2>
+			</div>
+		);
+	}
+
 	return (
 		<AuthContext.Provider value={{ user, login, logout, loading, isAuthenticated: !!user }}>
-			{!loading && children}
+			{children}
 		</AuthContext.Provider>
 	);
 };
