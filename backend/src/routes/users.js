@@ -5,7 +5,7 @@ import multer from "multer";
 import path from "path";
 import fs from "fs";
 import { verifyToken } from "../middlewares/authMiddleware.js";
-import { updateAccountSchema } from "../schemas.js";
+import { updateAccountSchema, locationSchema } from "../schemas.js";
 
 const router = express.Router();
 
@@ -244,6 +244,63 @@ router.put("/account", (req, res) => {
 	} catch (error) {
 		if (error.issues)
 			return res.status(400).json({ error: error.issues[0].message });
+		console.error(error);
+		res.status(500).json({ error: "Server error" });
+	}
+});
+
+/* PUT LOCATION */
+router.put("/location", (req, res) => {
+	try {
+		const { latitude, longitude } = locationSchema.parse(req.body);
+
+		// Met a jour la position
+		db.prepare("UPDATE users SET latitude = ?, longitude = ? WHERE id = ?")
+			.run(latitude, longitude, req.user.id);
+
+		res.json({ message: "Location updated" });
+
+	} catch (error) {
+		if (error.issues) return res.status(400).json({ error: error.issues[0].message });
+		console.error(error);
+		res.status(500).json({ error: "Server error" });
+	}
+});
+
+/* GET LIKERS (Who liked me) */
+router.get("/likes", (req, res) => {
+	try {
+		// On recup les infos des gens qui ont like l'utilisateur connecte
+		const likers = db.prepare(`
+			SELECT u.id, u.username, u.age, u.fame_rating, i.file_path as profile_pic
+			FROM likes l
+			JOIN users u ON l.liker_id = u.id
+			LEFT JOIN images i ON u.id = i.user_id AND i.is_profile_pic = 1
+			WHERE l.liked_id = ?
+		`).all(req.user.id);
+
+		res.json(likers);
+	} catch (error) {
+		console.error(error);
+		res.status(500).json({ error: "Server error" });
+	}
+});
+
+/* GET VISITORS (Who visited me) */
+router.get("/visits", (req, res) => {
+	try {
+		// On recup l'historique des visites
+		const visitors = db.prepare(`
+			SELECT u.id, u.username, u.fame_rating, i.file_path as profile_pic, v.created_at
+			FROM visits v
+			JOIN users u ON v.visitor_id = u.id
+			LEFT JOIN images i ON u.id = i.user_id AND i.is_profile_pic = 1
+			WHERE v.visited_id = ?
+			ORDER BY v.created_at DESC
+		`).all(req.user.id);
+
+		res.json(visitors);
+	} catch (error) {
 		console.error(error);
 		res.status(500).json({ error: "Server error" });
 	}

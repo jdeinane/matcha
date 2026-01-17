@@ -50,3 +50,8 @@ export const updateAccountSchema = z.object({
 	first_name: z.string().min(2).max(50).optional(),
 	last_name: z.string().min(2).max(50).optional(),
 });
+
+export const locationSchema = z.object({
+	latitude: z.number().min(-90, "Invalid latitude").max(90, "Invalid latitude"),
+	longitude: z.number().min(-180, "Invalid longitude").max(180, "Invalid longitude"),
+});
