@@ -10,6 +10,8 @@ import authRoutes from "./routes/auth.js";
 import usersRoutes from "./routes/users.js";
 import browsingRoutes from "./routes/browsing.js";
 import interactionsRoutes from "./routes/interactions.js";
+import notificationsRoutes from "./routes/notifications.js";
+import chatRoutes from "./routes/chat.js";
 
 if (!process.env.JWT_SECRET && process.env.NODE_ENV === 'production') {
 	console.error("❌ FATAL: JWT_SECRET missing in production.");
@@ -50,6 +52,10 @@ export function createApp() {
 	app.use("/api/users", usersRoutes);
 
 	app.use("/api/interactions", interactionsRoutes);
+	
+	app.use("/api/notifications", notificationsRoutes);
+
+	app.use("/api/chat", chatRoutes);
 
 	app.get("/api/health", (req, res) => {
 		res.json({ status: "ok", message: "Backend is running!" });
