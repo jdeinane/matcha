@@ -1,4 +1,5 @@
 import { createContext, useState, useEffect, useContext } from "react";
+import axios from "axios";
 
 const AuthContext = createContext(null);
 
@@ -6,18 +7,13 @@ export const AuthProvider = ({ children }) => {
 	const [user, setUser] = useState(null);
 	const [loading, setLoading] = useState(true);
 
-	const API_URL = import.meta.env.VITE_API_URL;
-
 	useEffect(() => {
 		const checkAuth = async () => {
 			try {
-				const res = await fetch(`${API_URL}/api/auth/me`, {
-					credentials: "include"
-				});
-				const data = await res.json();
+				const res = await axios.get("/api/auth/me");
 
-				if (data.authenticated && data.user) {
-					setUser(data.user);
+				if (res.data.authenticated) {
+					setUser(res.data.user);
 				} else {
 					setUser(null);
 				}
@@ -29,15 +25,16 @@ export const AuthProvider = ({ children }) => {
 		};
 
 		checkAuth();
-	}, [API_URL]);
+	}, []);
 
-	const login = (userData) => {
-		setUser(userData);
-	};
+	const login = async (username, password) => {
+			const res = await axios.post("/api/auth/login", { username, password });
+			setUser(res.data.user);
+		};
 
 	const logout = async () => {
 		try {
-			await fetch(`${API_URL}/api/auth/logout`, { method: "POST" });
+			await axios.post("/api/auth/logout");
 			setUser(null);
 			window.location.href = "/login";
 		} catch (error) {
@@ -48,7 +45,7 @@ export const AuthProvider = ({ children }) => {
 	if (loading) {
 		return (
 			<div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-				<h2>Chargement de l'application... (Vérification Auth)</h2>
+				<h2>Loading app... (Vérification Auth)</h2>
 			</div>
 		);
 	}

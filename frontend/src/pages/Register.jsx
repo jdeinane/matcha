@@ -1,31 +1,22 @@
 import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import axios from "axios";
 
 const Register = () => {
 	const { register, handleSubmit, formState: { errors} } = useForm();
 	const navigate = useNavigate();
-	const API_URL = import.meta.env.VITE_API_URL;
 
 	const onSubmit = async (data) => {
 		try {
-			const response = await fetch(`${API_URL}/api/auth/register`, {
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify(data)
-			});
-
-			const result = await response.json();
-
-			if (!response.ok) {
-				throw new Error(result.error || "An error has occurred");
-			}
+			await axios.post("/api/auth/register", data);
 
 			toast.success("Successfully registered! Please check your mail box.");
 			navigate("/login");
 
 		} catch (error) {
-			toast.error(error.message);
+			const message = error.response?.data?.error || "An error has occurred";
+			toast.error(message);
 		}
 	};
 
@@ -38,7 +29,7 @@ const Register = () => {
 				<form onSubmit={handleSubmit(onSubmit)} className="flex-col">
 					
 					<div className="input-group">
-						<label>Nom d'utilisateur</label>
+						<label>Username</label>
 						<input 
 							{...register("username", { required: "This field is required", minLength: { value: 3, message: "Min 3 characters" } })} 
 							placeholder="Ex: matcha_lover"
@@ -58,19 +49,19 @@ const Register = () => {
 
 					<div style={{ display: 'flex', gap: '10px' }}>
 						<div className="input-group" style={{ flex: 1 }}>
-							<label>Prénom</label>
+							<label>First name</label>
 							<input {...register("first_name", { required: "Required" })} />
 							{errors.first_name && <p className="error-msg">{errors.first_name.message}</p>}
 						</div>
 						<div className="input-group" style={{ flex: 1 }}>
-							<label>Nom</label>
+							<label>Last name</label>
 							<input {...register("last_name", { required: "Required" })} />
 							{errors.last_name && <p className="error-msg">{errors.last_name.message}</p>}
 						</div>
 					</div>
 
 					<div className="input-group">
-						<label>Mot de passe</label>
+						<label>Password</label>
 						<input 
 							type="password"
 							{...register("password", { 
@@ -82,7 +73,7 @@ const Register = () => {
 						{errors.password && <p className="error-msg">{errors.password.message}</p>}
 					</div>
 
-					<button type="submit" className="btn">S'inscrire</button>
+					<button type="submit" className="btn">Register!</button>
 				</form>
 
 				<p className="center" style={{ marginTop: '1.5rem' }}>
