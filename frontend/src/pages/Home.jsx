@@ -40,7 +40,7 @@ const Home = () => {
 			
 			<div style={{marginBottom: '50px'}}>
 				<p style={{fontSize: '1.2rem', color: '#555'}}>
-					Find your perfect match based on interests, location and popularity.
+					Let's grab a coffee if we matcha
 				</p>
 			</div>
 

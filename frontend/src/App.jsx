@@ -79,57 +79,50 @@ const Navbar = () => {
 	};
 
 	return (
-		<nav style={{ 
-			padding: '15px 30px', 
-			background: '#fff', 
-			borderBottom: '1px solid #ddd', 
-			display: 'flex', 
-			justifyContent: 'space-between', 
-			alignItems: 'center',
-			position: 'relative',
-			zIndex: 100
-		}}>
-			<Link to="/" style={{fontSize: '1.5rem', fontWeight: 'bold', textDecoration: 'none', color: '#E91E63'}}>🍵 Matcha</Link>
-			<Link to="/search" style={{textDecoration: 'none', color: '#333'}}>🔍 Search</Link>
-			<div style={{display: 'flex', gap: '20px', alignItems: 'center'}}>
-				<Link to="/browse" style={{textDecoration: 'none', color: '#333'}}>💞 Browse</Link>
-				<Link to="/chat" style={{textDecoration: 'none', color: '#333'}}>💬 Chat</Link>
+		<nav>
+			<Link to="/" className="logo-text">Matcha.</Link>
+			
+			<div style={{display: 'flex', alignItems: 'center'}}>
+				<Link to="/search">Search</Link>
+				<Link to="/browse">Discover</Link>
+				<Link to="/chat">Chat</Link>
 				
-				<div style={{position: 'relative'}}>
+				<div style={{position: 'relative', marginLeft: '25px'}}>
 					<div 
+						className="nav-item"
 						onClick={handleToggleNotifs} 
-						style={{cursor: 'pointer', position: 'relative', color: '#333'}}
+						style={{ cursor: 'pointer', display: 'flex', alignItems: 'center' }}
 					>
-						🔔 Notifs
+						Notifications
 						{unreadCount > 0 && (
-							<span style={{
-								position: 'absolute', top: '-8px', right: '-10px',
-								background: 'red', color: 'white', fontSize: '0.7rem',
-								padding: '2px 6px', borderRadius: '50%', fontWeight: 'bold'
-							}}>
-								{unreadCount}
-							</span>
+							<span className="notif-badge">{unreadCount}</span>
 						)}
 					</div>
 
 					{showDropdown && (
 						<div style={{
 							position: 'absolute',
-							top: '40px',
-							right: '-50px',
+							top: '50px',
+							right: '-10px',
 							width: '320px',
 							maxHeight: '400px',
 							overflowY: 'auto',
-							background: 'white',
-							border: '1px solid #ddd',
-							borderRadius: '8px',
-							boxShadow: '0 5px 15px rgba(0,0,0,0.2)',
+							background: '#F8F6E8',
+							border: '1px solid #1F1F1F',
 							zIndex: 1000
 						}}>
-							<h4 style={{padding: '10px 15px', margin: 0, borderBottom: '1px solid #eee', color: '#333'}}>Notifications</h4>
+							<h4 style={{
+								padding: '15px', 
+								margin: 0, 
+								borderBottom: '1px solid rgba(0,0,0,0.1)', 
+								fontFamily: 'var(--font-heading)',
+								fontSize: '1.2rem'
+							}}>
+								Vos dernières activités
+							</h4>
 							
 							{notifications.length === 0 ? (
-								<p style={{padding: '20px', textAlign: 'center', color: '#888', margin: 0}}>No notifications</p>
+								<p style={{padding: '20px', textAlign: 'center', color: '#888', margin: 0}}>Rien pour le moment.</p>
 							) : (
 								<div style={{display: 'flex', flexDirection: 'column'}}>
 									{notifications.map(n => (
@@ -139,21 +132,23 @@ const Navbar = () => {
 											onClick={() => setShowDropdown(false)}
 											style={{
 												textDecoration: 'none', 
-												color: '#333',
-												padding: '10px 15px', 
-												borderBottom: '1px solid #f5f5f5',
-												background: n.is_read ? 'white' : '#e3f2fd',
-												display: 'flex', alignItems: 'center', gap: '10px'
+												color: '#1F1F1F',
+												padding: '15px', 
+												borderBottom: '1px solid rgba(0,0,0,0.05)',
+												background: n.is_read ? 'transparent' : 'rgba(238, 231, 160, 0.2)', 
+												display: 'flex', alignItems: 'center', gap: '15px'
 											}}
 										>
 											<div style={{fontSize: '1.2rem'}}>{getIcon(n.type)}</div>
 											<img 
 												src={n.sender_pic ? `http://localhost:3000${n.sender_pic}` : "https://via.placeholder.com/40"} 
-												style={{width: '35px', height: '35px', borderRadius: '50%', objectFit: 'cover'}}
+												style={{width: '40px', height: '40px', objectFit: 'cover', borderRadius: '50%'}}
 											/>
-											<div style={{fontSize: '0.9rem'}}>
-												<strong>{n.sender_name}</strong> {getMessage(n)}
-												<div style={{fontSize: '0.7rem', color: '#888', marginTop: '2px'}}>
+											<div style={{flex: 1}}>
+												<div style={{fontFamily: 'var(--font-body)', fontSize: '0.9rem'}}>
+													<strong>{n.sender_name}</strong> {getMessage(n)}
+												</div>
+												<div style={{fontSize: '0.7rem', color: '#615348', marginTop: '4px', textTransform: 'uppercase'}}>
 													{new Date(n.created_at).toLocaleString()}
 												</div>
 											</div>
@@ -166,20 +161,21 @@ const Navbar = () => {
 				</div>
 
 				{user && (
-                    <>
-                        <Link to={`/user/${user.id}`} style={{textDecoration: 'none', color: '#333'}}>
-                            👤 My Profile
-                        </Link>
-                        <Link to="/settings" style={{textDecoration: 'none', color: '#333'}}>
-                            ⚙️ Settings
-                        </Link>
-                    </>
-                )}
-				
+					<>
+						<Link to={`/user/${user.id}`}>Profile</Link>
+						<Link to="/settings">Settings</Link>
+					</>
+				)}
 			</div>
 		</nav>
 	);
 };
+
+const Footer = () => (
+	<footer style={{ textAlign: 'center', padding: '40px', marginTop: 'auto', fontFamily: 'var(--font-accent)', fontSize: '0.6rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.2em' }}>
+		© 2026 Matcha — jubaldo 42 Paris
+	</footer>
+);
 
 const Layout = () => {
 	return (
@@ -188,6 +184,7 @@ const Layout = () => {
 			<div style={{ flex: 1, width: '100%' }}> 
 				<Outlet /> 
 			</div>
+			<Footer />
 		</div>
 	);
 };
