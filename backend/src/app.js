@@ -29,7 +29,9 @@ export function createApp() {
 
 	app.use(morgan("dev"));
 
-	app.use(helmet());
+	app.use(helmet({
+		crossOriginResourcePolicy: { policy: "cross-origin" }
+	}));
 
 	app.use("/api", limiter);
 

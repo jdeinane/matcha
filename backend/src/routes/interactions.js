@@ -7,46 +7,45 @@ const router = express.Router();
 router.use(verifyToken);
 
 /* POST LIKE: 'Like' user */
-router.post("/like/:id", (req, res) => {
+router.post("/like", (req, res) => {
 	try {
-		const targetId = parseInt(req.params.id);
-		const likerId = req.user.id;
-		const likerName = req.user.username;
+		const { target_id } = req.body;
+		const liker_id = req.user.id;
 
-		if (targetId === likerId)
-			return res.status(400).json({ error: "You cannot like yourself" });
+		if (!target_id || target_id == liker_id)
+			return res.status(400).json({ error: "Invalid target" });
 
 		// Verifier si deja like
-		const existingLike = db.prepare("SELECT id FROM likes WHERE liker_id = ? AND liked_id = ?").get(likerId, targetId);
+		const existingLike = db.prepare("SELECT id FROM likes WHERE liker_id = ? AND liked_id = ?").get(liker_id, target_id);
 		if (existingLike)
 			return res.json({ message: "Already liked"});
 
 		// 1. Inserer le like
-		db.prepare("INSERT INTO likes (liker_id, liked_id) VALUES (?, ?)").run(likerId, targetId);
+		db.prepare("INSERT INTO likes (liker_id, liked_id) VALUES (?, ?)").run(liker_id, target_id);
 
 		// 2. Verifier si c'est un MATCH (like reciproque)
-		const likedBack = db.prepare("SELECT id FROM likes WHERE liker_id = ? AND liked_id = ?").get(targetId, likerId);
+		const likedBack = db.prepare("SELECT id FROM likes WHERE liker_id = ? AND liked_id = ?").get(target_id, liker_id);
 
 		if (likedBack) {
 			// C'est un match -> creer une notif 'Match' pour les deux
-			db.prepare("INSERT INTO notifications (recipient_id, sender_id, type) VALUES (?, ?, 'match')").run(targetId, likerId);
-			db.prepare("INSERT INTO notifications (recipient_id, sender_id, type) VALUES (?, ?, 'match')").run(likerId, targetId);
+			db.prepare("INSERT INTO notifications (recipient_id, sender_id, type) VALUES (?, ?, 'match')").run(target_id, liker_id);
+			db.prepare("INSERT INTO notifications (recipient_id, sender_id, type) VALUES (?, ?, 'match')").run(liker_id, target_id);
 			
 			// Sockets
-			notifyUser(targetId, "notification", { type: "match", sender_name:likerName });
-			notifyUser(likerId, "notification", { type: "match", sender_name: "Someone" });
+			notifyUser(target_id, "notification", { type: "match", message: `Match with ${req.user.username}` });
+			notifyUser(liker_id, "notification", { type: "match", message: "It's a Match!" });
 
-			return res.json({ message: "It's a match!", is_match: true });
+			return res.json({ message: "It's a match!", is_match: true, success: true });
 		} else {
 			// Juste un like simple -> Notif 'Like'
-			db.prepare("INSERT INTO notifications (recipient_id, sender_id, type) VALUES (?, ?, 'like')").run(targetId, likerId);
+			db.prepare("INSERT INTO notifications (recipient_id, sender_id, type) VALUES (?, ?, 'like')").run(target_id, liker_id);
 			// Popularite augmente -> +5 points pour un like recu
-			db.prepare("UPDATE users SET fame_rating = fame_rating + 5 WHERE id = ?").run(targetId);
+			db.prepare("UPDATE users SET fame_rating = fame_rating + 5 WHERE id = ?").run(target_id);
 
 			// Socket
-			notifyUser(targetId, "notification", { type: "like", sender_name: likerName });
+			notifyUser(target_id, "notification", { type: "like", message: `${req.user.username} liked you!` });
 
-			return res.json({ message: "Liked", is_match: false });
+			return res.json({ message: "Liked", is_match: !!likedBack });
 		}
 
 	} catch (error) {
@@ -56,26 +55,24 @@ router.post("/like/:id", (req, res) => {
 });
 
 /* DELETE LIKE: 'Unlike' */
-router.delete("/like/:id", (req, res) => {
+router.post("/unlike", (req, res) => {
 	try {
-		const targetId = parseInt(req.params.id);
-		const likerId = req.user.id;
+		const { target_id } = req.body;
+		const liker_id = req.user.id;
 
 		// 1. Supprimer le like
-		const info = db.prepare("DELETE FROM likes WHERE liker_id = ? AND liked_id = ?").run(likerId, targetId);
+		const info = db.prepare("DELETE FROM likes WHERE liker_id = ? AND liked_id = ?").run(liker_id, target_id);
 
 		if (info.changes > 0) {
-			// 2. Envoyer une notif "Unlike"
-			db.prepare("INSERT INTO notifications (recipient_id, sender_id, type) VALUES (?, ?, 'unlike')").run(targetId, likerId);
 			
-			// 3. Baisser la popularite si unliked (MIN 0)
-			db.prepare("UPDATE users SET fame_rating = CASE WHEN fame_rating - 5 < 0 THEN 0 ELSE fame_rating - 5 END WHERE id = ?").run(targetId);
+			// 2. Baisser la popularite si unliked (MIN 0)
+			db.prepare("UPDATE users SET fame_rating = MAX(0, fame_rating - 5) WHERE id = ?").run(target_id);
 		
 			// Socket
-			notifyUser(targetId, "notification", { type: "unlike", sender_name: req.user.username });
+			notifyUser(target_id, "unmatch", { user_id: liker_id });
 		}
 
-		res.json({ message: "Unliked" });
+		res.json({ success: true });
 
 	} catch (error) {
 		console.error(error);
@@ -84,22 +81,22 @@ router.delete("/like/:id", (req, res) => {
 });
 
 /* POST BLOCK: Block user */
-router.post("/block/:id", (req, res) => {
+router.post("/block", (req, res) => {
 	try {
-		const targetId = parseInt(req.params.id);
+		const { target_id } = req.body;
 		const blockerId = req.user.id;
 
-		if (targetId === blockerId)
+		if (target_id === blockerId)
 			return res.status(400).json({ error: "Cannot block yourself" });
 
 		// Inserer le blocage
-		db.prepare("INSERT OR IGNORE INTO blocks (blocker_id, blocked_id) VALUES (?, ?)").run(blockerId, targetId);
+		db.prepare("INSERT OR IGNORE INTO blocks (blocker_id, blocked_id) VALUES (?, ?)").run(blockerId, target_id);
 
 		// Retirer les likes mutuels -> le blocage casse le match
-		db.prepare("DELETE FROM likes WHERE liker_id = ? AND liked_id = ?").run(blockerId, targetId);
-		db.prepare("DELETE FROM likes WHERE liker_id = ? AND liked_id = ?").run(targetId, blockerId);
+		db.prepare("DELETE FROM likes WHERE liker_id = ? AND liked_id = ?").run(blockerId, target_id);
+		db.prepare("DELETE FROM likes WHERE liker_id = ? AND liked_id = ?").run(target_id, blockerId);
 
-		res.json({ message: "User blocked" });
+		res.json({ success: true });
 
 	} catch (error) {
 		console.error(error);
@@ -108,14 +105,13 @@ router.post("/block/:id", (req, res) => {
 });
 
 /* POST REPORT: Report user */
-router.post("/report/:id", (req, res) => {
+router.post("/report", (req, res) => {
 	try {
-		const targetId = parseInt(req.params.id);
+		const { target_id, reason } = req.body;
 		const reporterId = req.user.id;
-		const { reason } = req.body;
 
 		// Inserer le signalement
-		db.prepare("INSERT OR IGNORE INTO reports (reporter_id, reported_id) VALUES (?, ?)").run(reporterId, targetId);
+		db.prepare("INSERT OR IGNORE INTO reports (reporter_id, reported_id, reason) VALUES (?, ?, ?)").run(reporterId, target_id, reason || "No reason");
 
 		// TODO: Envoyer un mail a l'admin
 		res.json({ message: "User reported" });

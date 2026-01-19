@@ -1,11 +1,10 @@
 import express from "express";
 import { db } from "../db.js";
-import { z } from "zod";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
 import { verifyToken } from "../middlewares/authMiddleware.js";
-import { updateAccountSchema, locationSchema } from "../schemas.js";
+import { updateAccountSchema, locationSchema, profileSchema } from "../schemas.js";
 
 const router = express.Router();
 
@@ -36,14 +35,6 @@ const upload = multer({
 		}
 		cb(new Error("Only images (jpeg, jpg, png, webp) are allowed"));
 	}
-});
-
-/* ZOD VALIDATION */
-const profileSchema = z.object({
-	gender: z.enum(['male', 'female', 'other']),
-	sexual_preference: z.enum(['heterosexual', 'gay', 'bisexual']),
-	biography: z.string().max(500).optional(),
-	tags: z.array(z.string()).max(10, "Max 10 tags").optional()
 });
 
 /* ROUTES PROTECTION */
@@ -81,14 +72,14 @@ router.get("/profile", (req, res) => {
 /* PUT PROFILE */
 router.put("/profile", (req, res) => {
 	try {
-		const { gender, sexual_preference, biography, tags } = profileSchema.parse(req.body);
+		const { gender, sexual_preference, biography, tags, birthdate } = profileSchema.parse(req.body);
 
 		const updateUser = db.prepare(`
 			UPDATE users
-			SET gender = ?, sexual_preference = ?, biography = ?
+			SET gender = ?, sexual_preference = ?, biography = ?, birthdate = ?
 			WHERE id = ?
 		`);
-		updateUser.run(gender, sexual_preference, biography || "", req.user.id);
+		updateUser.run(gender, sexual_preference, biography, birthdate || "", req.user.id);
 
 		const deleteTags = db.prepare("DELETE FROM user_tags WHERE user_id = ?");
 		deleteTags.run(req.user.id);

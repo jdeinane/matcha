@@ -11,7 +11,7 @@ const Register = () => {
 		try {
 			await axios.post("/api/auth/register", data);
 
-			toast.success("Successfully registered! Please check your mail box.");
+			toast.success("Successfully registered! Please check your mailbox.");
 			navigate("/login");
 
 		} catch (error) {
@@ -67,7 +67,7 @@ const Register = () => {
 							{...register("password", { 
 								required: "Password required", 
 								minLength: { value: 8, message: "Min 8 characters" },
-								pattern: { value: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/, message: "Has to contain upper and lower character, digit and special character" }
+								pattern: { value: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/, message: "Must contain uppercase and lowercase letters, a digit, and a special character" }
 							})} 
 						/>
 						{errors.password && <p className="error-msg">{errors.password.message}</p>}
@@ -77,7 +77,7 @@ const Register = () => {
 				</form>
 
 				<p className="center" style={{ marginTop: '1.5rem' }}>
-					Already registered ? <Link to="/login" className="link">Login</Link>
+					Already registered? <Link to="/login" className="link">Login</Link>
 				</p>
 			</div>
 		</div>

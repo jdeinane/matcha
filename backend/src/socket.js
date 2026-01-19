@@ -1,77 +1,88 @@
+import { Server } from "socket.io";
 import jwt from "jsonwebtoken";
 import { db } from "./db.js";
 
-/* System that identifies an user via its cookie, stores it in a list 'Map' of connected users,
-	and allows to send targeted notifications. */
+let io;
+const onlineUsers = new Map();
 
-let ioInstance;
+export const initSocket = (httpServer) => {
+	console.log("🔌 Initializing Socket.io Server...");
 
-// Map pour stocker userId -> socketId
-const connectedUsers = new Map()
+	io = new Server(httpServer, {
+		cors: {
+			origin: process.env.CORS_ORIGIN || "http://localhost:5173",
+			methods: ["GET", "POST"]
+		}
+	});
 
-export function attachSockets(io) {
-	ioInstance = io;
-
-	// Middleware d'auth Socket (je te conseille de demander a chatGPT c'est quoi 'middleware encapsulation for Socket.io')
 	io.use((socket, next) => {
-		try {
-			// Recuperer le cookie 'token' depuis le header du handshake
-			const cookieHeader = socket.handshake.headers.cookie;
-			if (!cookieHeader)
-				return next(new Error("Authentication error"));
-
+		console.log(`⏳ New socket connection attempt: ${socket.id}`);
+		
+		let token = socket.handshake.query.token;
+		
+		if (!token && socket.handshake.headers.cookie) {
+			console.log("   -> No query token, checking cookies...");
 			const cookies = Object.fromEntries(
-				cookieHeader.split('; ').map(c => {
+				socket.handshake.headers.cookie.split('; ').map(c => {
 					const [key, ...v] = c.split('=');
 					return [key, v.join('=')];
 				})
 			);
-
-			const token = cookies['token'];
-			if (!token)
-				return next(new Error("Authentication error"));
-
-			const decoded = jwt.verify(token, process.env.JWT_SECRET);
-			socket.user = decoded; // on attache le user au socket
-			next();
-
-		} catch (err) {
-			next(new Error("Authentication error"));
+			token = cookies['token'];
 		}
+
+		if (!token) {
+			console.log("   ❌ Authentication Failed: No token found.");
+			return next(new Error("Authentication error"));
+		}
+
+		jwt.verify(token, process.env.JWT_SECRET || "secret_key", (err, decoded) => {
+			if (err) {
+				console.log(`   ❌ Authentication Failed: Invalid Token (${err.message})`);
+				return next(new Error("Authentication error"));
+			}
+			console.log(`   ✅ Authentication Success for User ID: ${decoded.id}`);
+			socket.user = decoded;
+			next();
+		});
 	});
 
 	io.on("connection", (socket) => {
-		const userId = socket.user.id;
-		console.log(`🟢 User connected: ${userId} (${socket.id})`);
+		const userId = Number(socket.user.id);
+		console.log(`🔗 User ${userId} fully connected on socket ${socket.id}`);
 
-		// 1. Enregistrer l'utilisateur comme connecte
-		connectedUsers.set(userId, socket.id);
+		onlineUsers.set(userId, socket.id);
 
-		// 2. Mettre a jour 'last_seen' a NULL (= en ligne maintenant)
-		db.prepare("UPDATE users SET last_seen = NULL WHERE id = ?").run(userId);
+		try {
+			db.prepare("UPDATE users SET last_seen = NULL WHERE id = ?").run(userId);
+		} catch (e) { console.error("Error updating last_seen:", e); }
 
-		// 3. Gerer la deconnexion
+		io.emit("userStatus", { userId, status: "online" });
+
 		socket.on("disconnect", () => {
-			console.log(`🔴 User disconnected: ${userId}`);
-			connectedUsers.delete(userId);
-			
-			// Mettre a jour last_seen avec le timestamp actuel
-			db.prepare("UPDATE users SET last_seen = datetime('now') WHERE id = ?").run(userId);
+			console.log(`❌ User ${userId} disconnected`);
+			onlineUsers.delete(userId);
+			try {
+				db.prepare("UPDATE users SET last_seen = datetime('now') WHERE id = ?").run(userId);
+			} catch (e) { console.error(e); }
+			io.emit("userStatus", { userId, status: "offline" });
 		});
 	});
-}
+};
 
-/* HELPER: Sends notification to a specific user */
-export function notifyUser(userId, type, payload) {
-	if (!ioInstance)
-		return;
+export const notifyUser = (userId, event, data) => {
+	if (!io) return;
+	const targetId = Number(userId);
+	const socketId = onlineUsers.get(targetId);
 
-	const socketId = connectedUsers.get(userId);
-	if (socketId)
-		ioInstance.to(socketId).emit(type, payload);
-}
+	if (socketId) {
+		console.log(`📡 Sending '${event}' to User ${targetId} (Socket ${socketId})`);
+		io.to(socketId).emit(event, data);
+	} else {
+		console.log(`⚠️ Failed to send '${event}': User ${targetId} is offline.`);
+	}
+};
 
-/* HELPER: Check if user is online */
-export function isUserOnline(userId) {
-	return connectedUsers.has(userId);
-}
+export const isUserOnline = (userId) => {
+	return onlineUsers.has(Number(userId));
+};

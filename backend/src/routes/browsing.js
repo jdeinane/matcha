@@ -47,6 +47,13 @@ router.get("/suggestions", (req, res) => {
 
 		// 1. Recuperer mon profil complet
 		const me = db.prepare("SELECT * FROM users WHERE id = ?").get(currentUserId);
+		if (!me)
+			return res.status(404).json({ error: "User profile not found. Please login again." });
+
+		if (!me.latitude || !me.longitude) {
+			me.latitude = 0;
+			me.longitude = 0;
+		}
 
 		// Recuperer mes tags (IDs) pour comparer
 		const myTags = db.prepare("SELECT tag_id FROM user_tags WHERE user_id = ?").all(currentUserId).map(t => t.tag_id);
@@ -68,14 +75,14 @@ router.get("/suggestions", (req, res) => {
 		// On exclut soi-meme et les comptes non verifies
 		// TODO: filtrer les bloques 
 		const query = `
-			SELECT id, username, first_name, birthdate, gender, fame_rating, latitude, longitude, file_path as profile_pic
+			SELECT users.id, username, first_name, birthdate, gender, fame_rating, latitude, longitude, file_path as profile_pic
 			FROM users
 			LEFT JOIN images ON users.id = images.user_id AND images.is_profile_pic = 1
-			WHERE id != ?
+			WHERE users.id != ?
 			AND is_verified = 1
 			${genderCondition}
-			AND id NOT IN (SELECT blocked_id FROM blocks WHERE blocker_id = ?)
-			AND id NOT IN (SELECT blocker_id FROM blocks WHERE blocked_id = ?)
+			AND users.id NOT IN (SELECT blocked_id FROM blocks WHERE blocker_id = ?)
+			AND users.id NOT IN (SELECT blocker_id FROM blocks WHERE blocked_id = ?)
 		`;
 
 		// Ajout des params pour les blocks
@@ -179,7 +186,7 @@ router.get("/user/:id", (req, res) => {
 
 		// 1. Recuperer le user
 		const user = db.prepare(`
-			SELECT id, username, first_name, last_name, gender, sexual_preference, biography, fame_rating, last_seen, latitude, longitude, city
+			SELECT id, username, first_name, last_name, gender, sexual_preference, biography, fame_rating, last_seen, latitude, longitude, city, birthdate
 			FROM users WHERE id = ?
 		`).get(targetId);
 
@@ -187,6 +194,7 @@ router.get("/user/:id", (req, res) => {
 			return res.status(404).json({ error: "User not found" });
 
 		// 2. Infos supplementaires (tags, images)
+		user.age = calculateAge(user.birthdate);
 		user.tags = db.prepare("SELECT t.name FROM tags t JOIN user_tags ut ON ut.tag_id = t.id WHERE ut.user_id = ?").all(targetId).map(t => t.name);
 		user.images = db.prepare("SELECT id, file_path, is_profile_pic FROM images WHERE user_id = ?").all(targetId);
 

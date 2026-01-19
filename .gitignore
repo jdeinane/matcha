@@ -15,6 +15,10 @@ dist-ssr/
 *.sqlite
 *.sqlite-*
 
+# Uploads (folder exists but ignore contents)
+backend/uploads/*
+!backend/uploads/.gitkeep
+
 # Logs
 logs/
 *.log

@@ -8,18 +8,52 @@ const router = express.Router();
 router.use(verifyToken);
 
 /* GET CONVERSATION */
-router.get("/:userId", (req, res) => {
+router.get("/conversations", (req, res) => {
+	try {
+		const userId = req.user.id;
+
+		// On cherche les users avec qui il y a Match (like mutuel)
+		const matches = db.prepare(`
+			SELECT u.id, u.username, u.first_name, u.last_name, i.file_path as profile_pic, u.last_seen
+			FROM users u
+			JOIN likes l1 ON l1.liker_id = u.id AND l1.liked_id = ?
+			JOIN likes l2 ON l2.liker_id = ? AND l2.liked_id = u.id
+			LEFT JOIN images i ON u.id = i.user_id AND i.is_profile_pic = 1
+		`).all(userId, userId);
+
+		// Pour chaque match, on recup le dernier message pour l'apercu
+		const conversations = matches.map(match => {
+			const lastMsg = db.prepare(`
+				SELECT content, sender_id, created_at, is_read 
+				FROM messages 
+				WHERE (sender_id = ? AND receiver_id = ?) 
+				OR (sender_id = ? AND receiver_id = ?)
+				ORDER BY created_at DESC LIMIT 1
+			`).get(userId, match.id, match.id, userId);
+
+			return { ...match, lastMessage: lastMsg || null };
+		});
+
+		res.json(conversations);
+
+	} catch (error) {
+		console.error(error);
+		res.status(500).json({ error: "Server error" });
+	}
+});
+
+/* GET MESSAGES (History) */
+router.get("/messages/:id", (req, res) => {
 	try {
 		const currentUserId = req.user.id;
-		const targetId = parseInt(req.params.userId);
+		const targetId = parseInt(req.params.id);
 
-		// Verification: est-ce qu'ils ont match? -> on verifie dans la table likes si le match existe encore
+		// Verif Match
 		const match = db.prepare(`
 			SELECT count(*) as count FROM likes 
 			WHERE (liker_id = ? AND liked_id = ?) OR (liker_id = ? AND liked_id = ?)
 		`).get(currentUserId, targetId, targetId, currentUserId);
 
-		// Verifie s'il y a 2 likes (Match) -> si count < 2, ils ne sont plus matches
 		if (match.count < 2)
 			return res.status(403).json({ error: "You must match to chat." });
 
@@ -27,9 +61,13 @@ router.get("/:userId", (req, res) => {
 			SELECT id, sender_id, content, created_at, is_read 
 			FROM messages 
 			WHERE (sender_id = ? AND receiver_id = ?) 
-			OR (sender_id = ? AND receiver_id = ?)
+			   OR (sender_id = ? AND receiver_id = ?)
 			ORDER BY created_at ASC
 		`).all(currentUserId, targetId, targetId, currentUserId);
+
+		// Marquer comme lu
+		db.prepare(`UPDATE messages SET is_read = 1 WHERE receiver_id = ? AND sender_id = ?`)
+		  .run(currentUserId, targetId);
 
 		res.json(messages);
 
@@ -39,13 +77,17 @@ router.get("/:userId", (req, res) => {
 	}
 });
 
-/* POST MESSAGE */
-router.post("/", (req, res) => {
+/* POST MESSAGE (Send) */
+router.post("/messages/:id", (req, res) => {
 	try {
-		const { recipient_id, content } = messageSchema.parse(req.body);
+		const recipient_id = parseInt(req.params.id);
+		const { content } = messageSchema.pick({ content: true }).parse(req.body);
 		const senderId = req.user.id;
 
-		// 1. Verifier si Match
+		if (!content || !content.trim()) 
+			return res.status(400).json({ error: "Message empty" });
+
+		// Verif Match
 		const match = db.prepare(`
 			SELECT count(*) as count FROM likes
 			WHERE (liker_id = ? AND liked_id = ?) OR (liker_id = ? AND liked_id = ?)
@@ -54,25 +96,24 @@ router.post("/", (req, res) => {
 		if (match.count < 2)
 			return res.status(403).json({ error: "You must match to chat." });
 
-		// 2. Inserer le message
+		// Insertion
 		const insert = db.prepare(`
 			INSERT INTO messages (sender_id, receiver_id, content)
-			VALUES (?, ?, ?)	
+			VALUES (?, ?, ?)    
 		`);
 		const info = insert.run(senderId, recipient_id, content);
 
 		const newMessage = {
 			id: info.lastInsertRowid,
 			sender_id: senderId,
+			receiver_id: recipient_id,
 			content: content,
 			created_at: new Date().toISOString(),
 			is_read: 0
 		};
 
-		// 3. Notifier le destinataire ne temps reel via Socket
-		notifyUser(recipient_id, "receiveMessage", newMessage);
-
-		// 4. Lui envoyer une notif "Nouveau message"
+		notifyUser(recipient_id, "message", newMessage);
+		
 		db.prepare("INSERT INTO notifications (recipient_id, sender_id, type) VALUES (?, ?, 'message')").run(recipient_id, senderId);
 		notifyUser(recipient_id, "notification", {
 			type: "message",
@@ -82,8 +123,6 @@ router.post("/", (req, res) => {
 		res.status(201).json(newMessage);
 
 	} catch (error) {
-		if (error.issues)
-			return res.status(400).json({ error: error.issues[0].message });
 		console.error(error);
 		res.status(500).json({ error: "Server error" });
 	}

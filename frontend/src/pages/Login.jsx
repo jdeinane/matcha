@@ -50,7 +50,7 @@ const Login = () => {
 				</form>
 
 				<p className="center" style={{ marginTop: '1.5rem' }}>
-					Not registed yet ? <Link to="/register" className="link">Register</Link>
+					Not registered yet? <Link to="/register" className="link">Register</Link>
 				</p>
 			</div>
 		</div>

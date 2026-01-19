@@ -45,6 +45,16 @@ export const resetPasswordSchema = z.object({
 		.regex(/[^A-Za-z0-9]/, "Must include special char"),
 });
 
+export const profileSchema = z.object({
+	gender: z.enum(["male", "female", "other"]),
+	sexual_preference: z.enum(["heterosexual", "gay", "bisexual"]),
+	biography: z.string().max(1000).optional(),
+	tags: z.array(z.string()).optional(),
+	birthdate: z.string().refine((date) => !isNaN(Date.parse(date)), {
+        message: "Invalid date format",
+	}).optional()
+});
+
 export const updateAccountSchema = z.object({
 	email: z.string().email().optional(),
 	first_name: z.string().min(2).max(50).optional(),
