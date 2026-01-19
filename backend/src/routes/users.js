@@ -263,7 +263,7 @@ router.get("/likes", (req, res) => {
 	try {
 		// On recup les infos des gens qui ont like l'utilisateur connecte
 		const likers = db.prepare(`
-			SELECT u.id, u.username, u.age, u.fame_rating, i.file_path as profile_pic
+			SELECT u.id, u.username, u.fame_rating, i.file_path as profile_pic, l.created_at
 			FROM likes l
 			JOIN users u ON l.liker_id = u.id
 			LEFT JOIN images i ON u.id = i.user_id AND i.is_profile_pic = 1
