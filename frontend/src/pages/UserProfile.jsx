@@ -14,6 +14,12 @@ const UserProfile = () => {
 
 	const isOwnProfile = currentUser && currentUser.id === Number(id);
 
+	const getImageUrl = (path) => {
+		if (!path) return "https://via.placeholder.com/300?text=No+Photo";
+		if (path.startsWith("http")) return path; 
+		return `http://localhost:3000${path}`;
+	};
+
 	const fetchUser = useCallback(async () => {
 		try {
 			const res = await axios.get(`/api/browsing/user/${id}`);
@@ -81,7 +87,7 @@ const reason = window.prompt("Why are you reporting this user?");
 			<div className="card" style={{display: 'flex', gap: '20px', alignItems: 'center', marginBottom: '20px'}}>
 				<div style={{width: '150px', height: '150px', borderRadius: '50%', overflow: 'hidden', border: '4px solid #fff', boxShadow: '0 2px 10px rgba(0,0,0,0.1)'}}>
 					<img 
-						src={user.images.find(img => img.is_profile_pic)?.file_path ? `http://localhost:3000${user.images.find(img => img.is_profile_pic).file_path}` : "https://via.placeholder.com/150"} 
+						src={getImageUrl(user.images.find(img => img.is_profile_pic)?.file_path)}
 						alt={user.username}
 						style={{width: '100%', height: '100%', objectFit: 'cover'}}
 					/>
@@ -137,7 +143,7 @@ const reason = window.prompt("Why are you reporting this user?");
 					{user.images.map(img => (
 						<img 
 							key={img.id} 
-							src={`http://localhost:3000${img.file_path}`} 
+							src={getImageUrl(img.file_path)}
 							alt={`${user.first_name}'s photo`}
 							style={{height: '200px', borderRadius: '8px'}} 
 						/>

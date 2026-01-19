@@ -20,6 +20,12 @@ const Home = () => {
 		fetchTopPicks();
 	}, []);
 
+	const getImageUrl = (path) => {
+        if (!path) return "https://via.placeholder.com/300?text=No+Photo";
+        if (path.startsWith("http")) return path;
+        return `http://localhost:3000${path}`;
+    };
+
 	const carouselStyle = {
 		display: 'flex',
 		gap: '20px',
@@ -33,7 +39,6 @@ const Home = () => {
 		<div className="container" style={{maxWidth: '1000px', margin: '0 auto', padding: '40px 20px', textAlign: 'center'}}>
 			
 			<div style={{marginBottom: '50px'}}>
-				<h1 style={{fontSize: '3rem', color: '#E91E63', marginBottom: '10px'}}>Welcome to Matcha 🍵</h1>
 				<p style={{fontSize: '1.2rem', color: '#555'}}>
 					Find your perfect match based on interests, location and popularity.
 				</p>
@@ -59,7 +64,7 @@ const Home = () => {
 									}}>
 										<div style={{height: '220px', background: '#eee'}}>
 											<img 
-												src={user.profile_pic ? `http://localhost:3000${user.profile_pic}` : "https://via.placeholder.com/220"} 
+												src={getImageUrl(user.profile_pic)}
 												style={{width: '100%', height: '100%', objectFit: 'cover'}}
 											/>
 										</div>

@@ -1,68 +1,42 @@
-/* --- BUTTONS --- */
-.btn {
-  display: inline-block;
-  padding: 10px 20px;
-  font-family: 'BBH_hegarty', cursive;
-  font-size: 1.2rem;
-  color: white;
-  background-color: var(--retro-orange);
-  border: 2px solid var(--matcha-dark);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-retro);
-  cursor: pointer;
-  transition: all 0.2s ease;
-  text-decoration: none;
+#root {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
   text-align: center;
 }
 
-.btn:hover {
-  transform: translate(2px, 2px); /* Effet d'enfoncement */
-  box-shadow: var(--shadow-hover);
+.logo {
+  height: 6em;
+  padding: 1.5em;
+  will-change: filter;
+  transition: filter 300ms;
+}
+.logo:hover {
+  filter: drop-shadow(0 0 2em #646cffaa);
+}
+.logo.react:hover {
+  filter: drop-shadow(0 0 2em #61dafbaa);
 }
 
-.btn-secondary {
-  background-color: var(--matcha-light);
-  color: var(--matcha-dark);
+@keyframes logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
-.btn-pink {
-  background-color: var(--retro-pink);
+@media (prefers-reduced-motion: no-preference) {
+  a:nth-of-type(2) .logo {
+    animation: logo-spin infinite 20s linear;
+  }
 }
 
-/* --- CARDS --- */
 .card {
-  background: var(--card-bg);
-  border: 2px solid var(--matcha-dark);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-retro);
-  overflow: hidden; /* Pour que l'image ne dépasse pas */
-  transition: transform 0.3s ease;
+  padding: 2em;
 }
 
-.card:hover {
-  transform: translateY(-5px); /* Légère lévitation */
-}
-
-/* --- INPUTS --- */
-input, select, textarea {
-  width: 100%;
-  padding: 12px;
-  border: 2px solid var(--matcha-dark);
-  border-radius: var(--radius-sm);
-  background: white;
-  font-family: 'Inter', sans-serif;
-  margin-bottom: 10px;
-  box-sizing: border-box; /* Important pour le sizing */
-}
-
-input:focus, select:focus, textarea:focus {
-  outline: none;
-  border-color: var(--retro-orange);
-  box-shadow: 2px 2px 0px var(--retro-orange);
-}
-
-/* --- NAVBAR --- */
-nav {
-  background: var(--card-bg) !important; /* Force le fond blanc */
-  border-bottom: 3px solid var(--matcha-dark) !important;
+.read-the-docs {
+  color: #888;
 }

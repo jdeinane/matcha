@@ -12,6 +12,12 @@ const Browsing = () => {
 		fetchSuggestions();
 	}, []);
 
+	const getImageUrl = (path) => {
+		if (!path) return "https://via.placeholder.com/300?text=No+Photo";
+		if (path.startsWith("http")) return path;
+		return `http://localhost:3000${path}`;
+    };
+
 	const fetchSuggestions = async () => {
 		try {
 			setLoading(true);
@@ -73,7 +79,7 @@ const Browsing = () => {
 							{/* Profile picture */}
 							<div style={{height: '250px', background: '#eee'}}>
 								<img 
-									src={user.profile_pic ? `http://localhost:3000${user.profile_pic}` : "https://via.placeholder.com/300?text=No+Photo"} 
+									src={getImageUrl(user.profile_pic)}
 									alt={user.username}
 									style={{width: '100%', height: '100%', objectFit: 'cover'}}
 								/>
