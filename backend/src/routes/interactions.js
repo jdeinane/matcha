@@ -15,6 +15,15 @@ router.post("/like", (req, res) => {
 		if (!target_id || target_id == liker_id)
 			return res.status(400).json({ error: "Invalid target" });
 
+		const isBlocked = db.prepare(`
+			SELECT 1 FROM blocks 
+			WHERE (blocker_id = ? AND blocked_id = ?) 
+			OR (blocker_id = ? AND blocked_id = ?)
+		`).get(liker_id, target_id, target_id, liker_id);
+
+		if (isBlocked)
+            return res.status(403).json({ error: "Action not allowed (blocked)" });
+
 		// Verifier si deja like
 		const existingLike = db.prepare("SELECT id FROM likes WHERE liker_id = ? AND liked_id = ?").get(liker_id, target_id);
 		if (existingLike)
