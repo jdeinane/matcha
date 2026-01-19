@@ -65,7 +65,7 @@ const UserProfile = () => {
 	};
 
 	const handleReport = async () => {
-const reason = window.prompt("Why are you reporting this user?");
+		const reason = window.prompt("Why are you reporting this user?");
 		if (!reason)
 			return;
 
@@ -80,96 +80,79 @@ const reason = window.prompt("Why are you reporting this user?");
 	if (loading)
 		return <div className="container center">Loading profile...</div>;
 
+	const profilePic = user.images.find(img => img.is_profile_pic)?.file_path;
 	return (
-		<div className="container" style={{maxWidth: '800px', margin: '0 auto', padding: '20px'}}>
-			
-			{/* PROFILE HEADER */}
-			<div className="card" style={{display: 'flex', gap: '20px', alignItems: 'center', marginBottom: '20px'}}>
-				<div style={{width: '150px', height: '150px', borderRadius: '50%', overflow: 'hidden', border: '4px solid #fff', boxShadow: '0 2px 10px rgba(0,0,0,0.1)'}}>
-					<img 
-						src={getImageUrl(user.images.find(img => img.is_profile_pic)?.file_path)}
-						alt={user.username}
-						style={{width: '100%', height: '100%', objectFit: 'cover'}}
-					/>
-				</div>
+		<div className="container" style={{ padding: '60px 20px' }}>
+			<div className="profile-layout">
 				<div>
-					<h1 style={{margin: 0}}>
-						{user.first_name} {user.last_name} <span style={{fontSize: '1rem', color: '#666'}}>({user.age} yo)</span>
-					</h1>
-					<p style={{color: user.is_online ? 'green' : 'gray', fontWeight: 'bold'}}>
-						{user.is_online ? "🟢 Online" : `Last seen: ${user.last_seen || "Unknown"}`}
-					</p>
-					<div style={{display: 'flex', gap: '10px', marginTop: '10px'}}>
-						<span className="badge">⭐ {user.fame_rating} Fame</span>
-						<span className="badge">📍 {user.city || "Unknown City"} ({user.distance ? Math.round(user.distance) : "?"} km)</span>
+					<img src={getImageUrl(profilePic)} alt={user.first_name} className="profile-image-main" />
+					<div className="profile-gallery">
+						{user.images.map(img => (
+							<img key={img.id} src={getImageUrl(img.file_path)} className="gallery-thumb" alt="Gallery" />
+						))}
 					</div>
 				</div>
-			</div>
-
-		<div style={{display: 'flex', gap: '10px', marginBottom: '20px'}}>
-			{isOwnProfile ? (
-				<Link 
-					to="/settings" 
-					className="btn" 
-					style={{flex: 1, textAlign: 'center', backgroundColor: '#2196F3', textDecoration: 'none'}}
-				>
-					✏️ Edit My Profile
-				</Link>
-			) : (
-				<>
-					<button 
-						onClick={handleLike} 
-						className="btn" 
-						style={{flex: 1, backgroundColor: user.is_liked ? '#e91e63' : '#ddd', color: user.is_liked ? 'white' : 'black'}}
-					>
-						{user.is_liked ? "💖 LIKED" : "🤍 LIKE"}
-					</button>
-					<button onClick={handleBlock} className="btn" style={{backgroundColor: '#333'}}>🚫 Block</button>
-					<button onClick={handleReport} className="btn" style={{backgroundColor: '#f44336'}}>⚠️ Report</button>
-				</>
-			)}
-			</div>
-
-			{user.is_match && (
-				<div style={{padding: '15px', background: '#e1bee7', color: '#4a148c', borderRadius: '8px', textAlign: 'center', marginBottom: '20px', fontWeight: 'bold'}}>
-					🎉 IT'S A MATCH! You can now chat.
-				</div>
-			)}
-
-			{/* PHOTOS */}
-			<div className="card" style={{marginBottom: '20px'}}>
-				<h3>Gallery</h3>
-				<div style={{display: 'flex', gap: '10px', overflowX: 'auto', paddingBottom: '10px'}}>
-					{user.images.map(img => (
-						<img 
-							key={img.id} 
-							src={getImageUrl(img.file_path)}
-							alt={`${user.first_name}'s photo`}
-							style={{height: '200px', borderRadius: '8px'}} 
-						/>
-					))}
-				</div>
-			</div>
-
-			{/* DETAILS */}
-			<div className="card">
-				<h3>About Me</h3>
-				<p>{user.biography || "No biography provided."}</p>
-				
-				<h3>Interests</h3>
-				<div style={{display: 'flex', gap: '5px', flexWrap: 'wrap'}}>
-					{user.tags && user.tags.length > 0 ? (
-						user.tags.map(tag => (
-							<span key={tag} style={{background: '#eee', padding: '5px 10px', borderRadius: '15px', fontSize: '0.9rem'}}>#{tag}</span>
-						))
-					) : (
-						<p style={{color: '#999'}}>No interests listed</p>
+				<div className="profile-info">
+					<div style={{ marginBottom: '20px' }}>
+						<h1 style={{ marginBottom: '5px' }}>{user.first_name}</h1>
+						<span style={{ 
+							fontFamily: 'var(--font-accent)', 
+							fontSize: '0.8rem', 
+							color: 'var(--text-muted)',
+							textTransform: 'uppercase',
+							letterSpacing: '0.1em'
+						}}>
+							@{user.username}
+						</span>
+					</div>
+					<div className="profile-meta">
+						<span className="status-indicator" style={{ background: user.is_online ? 'var(--matcha)' : '#ccc' }}></span>
+						{user.is_online ? "Currently Online" : `Last seen ${user.last_seen || "recently"}`}
+						<br /><br />
+						{user.age} Years — Based in {user.city}
+					</div>
+					<div className="profile-section">
+						<h3>About</h3>
+						<p style={{ fontSize: '1.1rem', fontStyle: 'italic' }}>{user.biography || "Silence is my biography."}</p>
+					</div>
+					<div className="profile-section">
+						<h3>Interests</h3>
+						<div>{user.tags?.map(tag => <span key={tag} className="tag-pill">#{tag}</span>)}</div>
+					</div>
+					<div style={{ marginTop: '40px' }}>
+						{isOwnProfile ? (
+							<Link to="/settings" className="btn" style={{ width: '100%' }}>Edit My Archive</Link>
+						) : (
+							<div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+								<div style={{ display: 'flex', gap: '10px' }}>
+									<button 
+										onClick={handleLike} 
+										className="btn" 
+										style={{ 
+											flex: 1, 
+											background: user.is_liked ? 'transparent' : 'var(--text-main)', 
+											color: user.is_liked ? 'var(--text-main)' : 'var(--bg-body)' 
+										}}
+									>
+										{user.is_liked ? "Unmatch" : "Match with her/him"}
+									</button>
+									{user.is_match && (
+										<Link to="/chat" className="btn" style={{ flex: 1 }}>Send Message</Link>
+									)}
+								</div>
+								<div style={{ display: 'flex', gap: '20px', marginTop: '10px', borderTop: '1px solid rgba(0,0,0,0.05)', paddingTop: '20px' }}>
+									<button onClick={handleReport} style={{ background: 'none', border: 'none', fontFamily: 'var(--font-accent)', fontSize: '0.6rem', cursor: 'pointer', textTransform: 'uppercase', color: 'var(--text-muted)' }}>Report Account</button>
+									<button onClick={handleBlock} style={{ background: 'none', border: 'none', fontFamily: 'var(--font-accent)', fontSize: '0.6rem', cursor: 'pointer', textTransform: 'uppercase', color: '#ff4444' }}>Block User</button>
+								</div>
+							</div>
+						)}
+					</div>
+					{user.is_match && !isOwnProfile && (
+						<div style={{ marginTop: '30px', padding: '15px', border: '1px solid var(--matcha)', textAlign: 'center', fontFamily: 'var(--font-heading)', fontStyle: 'italic' }}>
+							It's a Matcha! Your souls are connected.
+						</div>
 					)}
 				</div>
-
-				<h3>Info</h3>
-				<p>Gender: {user.gender}</p>
-				<p>Looking for: {user.sexual_preference}</p>
 			</div>
 		</div>
 	);

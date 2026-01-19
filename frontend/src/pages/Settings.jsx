@@ -218,25 +218,25 @@ const Profile = () => {
 		return <p style={{color: '#888', fontStyle: 'italic'}}>{emptyMsg}</p>;
 
 	return (
-            <div style={{display: 'flex', gap: '15px', overflowX: 'auto', paddingBottom: '10px'}}>
-                {users.map((u, i) => (
-                    <Link key={i} to={`/user/${u.id}`} style={{textDecoration: 'none', color: 'inherit', minWidth: '80px', textAlign: 'center'}}>
-                        <img 
-                            src={u.profile_pic ? `http://localhost:3000${u.profile_pic}` : "https://via.placeholder.com/50"} 
-                            style={{width: '60px', height: '60px', borderRadius: '50%', objectFit: 'cover', border: '2px solid #ddd'}}
-                        />
-                        <div style={{fontSize: '0.8rem', fontWeight: 'bold', marginTop: '5px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}>
-                            {u.username}
-                        </div>
-                        {u.created_at && (
-                            <div style={{fontSize: '0.7rem', color: '#999'}}>
-                                {new Date(u.created_at).toLocaleDateString()}
-                            </div>
-                        )}
-                    </Link>
-                ))}
-            </div>
-        );
+			<div style={{display: 'flex', gap: '15px', overflowX: 'auto', paddingBottom: '10px'}}>
+				{users.map((u, i) => (
+					<Link key={i} to={`/user/${u.id}`} style={{textDecoration: 'none', color: 'inherit', minWidth: '80px', textAlign: 'center'}}>
+						<img 
+							src={u.profile_pic ? `http://localhost:3000${u.profile_pic}` : "https://via.placeholder.com/50"} 
+							style={{width: '60px', height: '60px', borderRadius: '50%', objectFit: 'cover', border: '2px solid #ddd'}}
+						/>
+						<div style={{fontSize: '0.8rem', fontWeight: 'bold', marginTop: '5px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}>
+							{u.username}
+						</div>
+						{u.created_at && (
+							<div style={{fontSize: '0.7rem', color: '#999'}}>
+								{new Date(u.created_at).toLocaleDateString()}
+							</div>
+						)}
+					</Link>
+				))}
+			</div>
+		);
 	};
 
 	if (loading)
@@ -373,22 +373,20 @@ const Profile = () => {
 
 			{/* SECTION 5: HISTORIQUE */}
 			<div className="card" style={{marginTop: '20px', padding: '20px', border: '1px solid #ddd'}}>
-                <h2>History</h2>
-                
-                <div style={{marginBottom: '20px'}}>
-                    <h3 style={{fontSize: '1.1rem', borderBottom: '1px solid #eee', paddingBottom: '5px'}}>
-                        People who liked you
-                    </h3>
-                    <UserList users={history.likes} emptyMsg="No likes yet. Keep updating your profile!" />
-                </div>
-
-                <div>
-                    <h3 style={{fontSize: '1.1rem', borderBottom: '1px solid #eee', paddingBottom: '5px'}}>
-                        👀 Recent Guests
-                    </h3>
-                    <UserList users={history.visits} emptyMsg="No visitors yet." />
-                </div>
-            </div>
+				<h2>History</h2>
+				<div style={{marginBottom: '20px'}}>
+					<h3 style={{fontSize: '1.1rem', borderBottom: '1px solid #eee', paddingBottom: '5px'}}>
+						People who liked you
+					</h3>
+					<UserList users={history.likes} emptyMsg="No likes yet. Keep updating your profile!" />
+				</div>
+				<div>
+					<h3 style={{fontSize: '1.1rem', borderBottom: '1px solid #eee', paddingBottom: '5px'}}>
+						👀 Recent Guests
+					</h3>
+					<UserList users={history.visits} emptyMsg="No visitors yet." />
+				</div>
+			</div>
 		</div>
 	);
 };
