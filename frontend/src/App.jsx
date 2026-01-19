@@ -28,17 +28,6 @@ const Navbar = () => {
 	const [showDropdown, setShowDropdown] = useState(false);
 	const [notifications, setNotifications] = useState([]);
 
-	const getIcon = (type) => {
-		switch (type) {
-			case "like": return "💖";
-			case "visit": return "👀";
-			case "match": return "🔥";
-			case "message": return "💬";
-			case "unlike": return "💔";
-			default: return "🔔";
-		}
-	};
-
 	const getMessage = (n) => {
 		switch (n.type) {
 			case "like": return "liked your profile.";
@@ -100,29 +89,13 @@ const Navbar = () => {
 					</div>
 
 					{showDropdown && (
-						<div style={{
-							position: 'absolute',
-							top: '50px',
-							right: '-10px',
-							width: '320px',
-							maxHeight: '400px',
-							overflowY: 'auto',
-							background: '#F8F6E8',
-							border: '1px solid #1F1F1F',
-							zIndex: 1000
-						}}>
-							<h4 style={{
-								padding: '15px', 
-								margin: 0, 
-								borderBottom: '1px solid rgba(0,0,0,0.1)', 
-								fontFamily: 'var(--font-heading)',
-								fontSize: '1.2rem'
-							}}>
-								Vos dernières activités
-							</h4>
+						<div className="dropdown-menu">
+							<h4>Recently</h4>
 							
 							{notifications.length === 0 ? (
-								<p style={{padding: '20px', textAlign: 'center', color: '#888', margin: 0}}>Rien pour le moment.</p>
+								<p style={{padding: '30px', textAlign: 'center', fontFamily: 'var(--font-heading)', fontStyle: 'italic'}}>
+									Aucune nouvelle notification.
+								</p>
 							) : (
 								<div style={{display: 'flex', flexDirection: 'column'}}>
 									{notifications.map(n => (
@@ -130,27 +103,20 @@ const Navbar = () => {
 											key={n.id} 
 											to={n.type === 'message' ? '/chat' : `/user/${n.sender_id}`}
 											onClick={() => setShowDropdown(false)}
-											style={{
-												textDecoration: 'none', 
-												color: '#1F1F1F',
-												padding: '15px', 
-												borderBottom: '1px solid rgba(0,0,0,0.05)',
-												background: n.is_read ? 'transparent' : 'rgba(238, 231, 160, 0.2)', 
-												display: 'flex', alignItems: 'center', gap: '15px'
-											}}
+											className="dropdown-link"
+											style={{ background: n.is_read ? 'transparent' : 'rgba(238, 231, 160, 0.15)' }}
 										>
-											<div style={{fontSize: '1.2rem'}}>{getIcon(n.type)}</div>
 											<img 
 												src={n.sender_pic ? `http://localhost:3000${n.sender_pic}` : "https://via.placeholder.com/40"} 
-												style={{width: '40px', height: '40px', objectFit: 'cover', borderRadius: '50%'}}
+												alt="avatar"
 											/>
-											<div style={{flex: 1}}>
-												<div style={{fontFamily: 'var(--font-body)', fontSize: '0.9rem'}}>
+											<div className="notif-content">
+												<div className="notif-text">
 													<strong>{n.sender_name}</strong> {getMessage(n)}
 												</div>
-												<div style={{fontSize: '0.7rem', color: '#615348', marginTop: '4px', textTransform: 'uppercase'}}>
-													{new Date(n.created_at).toLocaleString()}
-												</div>
+												<span className="notif-time">
+													{new Date(n.created_at).toLocaleDateString()}
+												</span>
 											</div>
 										</Link>
 									))}

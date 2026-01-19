@@ -47,7 +47,7 @@ const Browsing = () => {
 	};
 
 	if (loading)
-		return <div className="container center"><h2>Finding your match... 💖</h2></div>;
+		return <div className="container center"><h2>Finding your match... </h2></div>;
 
 	return (
 		<div className="container" style={{maxWidth: '1000px', margin: '0 auto', padding: '20px'}}>
@@ -58,11 +58,11 @@ const Browsing = () => {
 				<div className="input-group" style={{width: '200px'}}>
 					<label>Sort by:</label>
 					<select value={sortType} onChange={(e) => setSortType(e.target.value)}>
-						<option value="score">✨ Match Score</option>
-						<option value="distance">📍 Distance</option>
-						<option value="age">🎂 Age</option>
-						<option value="fame">⭐ Popularity</option>
-						<option value="tags">🏷️ Common Tags</option>
+						<option value="score">Match Score</option>
+						<option value="distance">Distance</option>
+						<option value="age">Age</option>
+						<option value="fame">Popularity</option>
+						<option value="tags">Common Tags</option>
 					</select>
 				</div>
 			</div>
