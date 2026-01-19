@@ -45,7 +45,7 @@ const Search = () => {
 
 	return (
 		<div className="container" style={{maxWidth: '1000px', margin: '0 auto', padding: '20px'}}>
-			<h1>🔍 Advanced Search</h1>
+			<h1>Advanced Search</h1>
 			
 			<div className="card" style={{padding: '20px', marginBottom: '30px'}}>
 				<form onSubmit={handleSearch} style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px'}}>

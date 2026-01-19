@@ -249,7 +249,7 @@ const Profile = () => {
 
 			{/* SECTION 1: PHOTOS */}
 			<div className="card" style={{marginBottom: '20px', padding: '20px', border: '1px solid #ddd'}}>
-				<h2>📸 Photos ({profile.images?.length}/5)</h2>
+				<h2>Photos ({profile.images?.length}/5)</h2>
 				<div style={{display: 'flex', gap: '10px', flexWrap: 'wrap', marginBottom: '10px'}}>
 					{profile.images?.map(img => (
 						<div key={img.id} style={{position: 'relative', width: '100px', height: '100px'}}>
@@ -278,7 +278,7 @@ const Profile = () => {
 
 			{/* SECTION 2: GEOLOCALISATION */}
 			<div className="card" style={{marginBottom: '20px', padding: '20px', border: '1px solid #ddd'}}>
-				<h2>📍 Location</h2>
+				<h2>Location</h2>
 				<p>
 					Latitude: {profile.latitude || "Not set"} <br/>
 					Longitude: {profile.longitude || "Not set"}
@@ -304,7 +304,7 @@ const Profile = () => {
 
 			{/* SECTION 3: INFORMATIONS PUBLIQUES */}
 			<div className="card" style={{marginBottom: '20px', padding: '20px', border: '1px solid #ddd'}}>
-				<h2>📝 Public Details</h2>
+				<h2>Public Details</h2>
 				<form onSubmit={updateProfile} className="flex-col">
 					<div className="input-group">
 						<label>Gender</label>
@@ -373,11 +373,11 @@ const Profile = () => {
 
 			{/* SECTION 5: HISTORIQUE */}
 			<div className="card" style={{marginTop: '20px', padding: '20px', border: '1px solid #ddd'}}>
-                <h2>📜 History</h2>
+                <h2>History</h2>
                 
                 <div style={{marginBottom: '20px'}}>
                     <h3 style={{fontSize: '1.1rem', borderBottom: '1px solid #eee', paddingBottom: '5px'}}>
-                        💖 People who liked you
+                        People who liked you
                     </h3>
                     <UserList users={history.likes} emptyMsg="No likes yet. Keep updating your profile!" />
                 </div>

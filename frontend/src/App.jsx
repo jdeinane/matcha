@@ -75,7 +75,12 @@ const Navbar = () => {
 				<Link to="/search">Search</Link>
 				<Link to="/browse">Discover</Link>
 				<Link to="/chat">Chat</Link>
-				
+				<Link to={`/user/${user.id}`}>Profile</Link>
+				{user && (
+					<>
+						<Link to="/settings">Settings</Link>
+					</>
+				)}
 				<div style={{position: 'relative', marginLeft: '25px'}}>
 					<div 
 						className="nav-item"
@@ -125,13 +130,6 @@ const Navbar = () => {
 						</div>
 					)}
 				</div>
-
-				{user && (
-					<>
-						<Link to={`/user/${user.id}`}>Profile</Link>
-						<Link to="/settings">Settings</Link>
-					</>
-				)}
 			</div>
 		</nav>
 	);

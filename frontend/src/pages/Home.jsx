@@ -70,7 +70,7 @@ const Home = () => {
                                         <div style={{ textAlign: 'left' }}>
                                             <h3 style={{ fontSize: '1.2rem', marginBottom: '5px' }}>{user.first_name}</h3>
                                             <p>
-                                                {user.age} ANS — {Math.round(user.distance)} KM
+                                                {user.age} — {Math.round(user.distance)} KM
                                             </p>
                                         </div>
                                     </div>

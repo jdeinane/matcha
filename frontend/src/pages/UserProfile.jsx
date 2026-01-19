@@ -138,7 +138,7 @@ const reason = window.prompt("Why are you reporting this user?");
 
 			{/* PHOTOS */}
 			<div className="card" style={{marginBottom: '20px'}}>
-				<h3>📸 Gallery</h3>
+				<h3>Gallery</h3>
 				<div style={{display: 'flex', gap: '10px', overflowX: 'auto', paddingBottom: '10px'}}>
 					{user.images.map(img => (
 						<img 
@@ -153,10 +153,10 @@ const reason = window.prompt("Why are you reporting this user?");
 
 			{/* DETAILS */}
 			<div className="card">
-				<h3>📝 Biography</h3>
+				<h3>About Me</h3>
 				<p>{user.biography || "No biography provided."}</p>
 				
-				<h3>🏷️ Interests</h3>
+				<h3>Interests</h3>
 				<div style={{display: 'flex', gap: '5px', flexWrap: 'wrap'}}>
 					{user.tags && user.tags.length > 0 ? (
 						user.tags.map(tag => (
@@ -167,7 +167,7 @@ const reason = window.prompt("Why are you reporting this user?");
 					)}
 				</div>
 
-				<h3>⚧ Info</h3>
+				<h3>Info</h3>
 				<p>Gender: {user.gender}</p>
 				<p>Looking for: {user.sexual_preference}</p>
 			</div>
