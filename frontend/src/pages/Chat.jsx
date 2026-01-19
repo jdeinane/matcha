@@ -81,89 +81,73 @@ const Chat = () => {
 	};
 
 	return (
-		<div className="container" style={{display: 'flex', height: '80vh', maxWidth: '1000px', margin: '20px auto', boxShadow: '0 0 10px rgba(0,0,0,0.1)', background: 'white', borderRadius: '8px', overflow: 'hidden'}}>
-			
-			{/* SIDEBAR */}
-			<div style={{width: '300px', borderRight: '1px solid #ddd', overflowY: 'auto', background: '#f9f9f9'}}>
-				<h3 style={{padding: '15px', margin: 0, borderBottom: '1px solid #eee'}}>Matches</h3>
-				{conversations.length === 0 && <p style={{padding: '15px', color: '#888'}}>No matches yet.</p>}
-				
-				{conversations.map(conv => (
-					<div 
-						key={conv.id}
-						onClick={() => fetchMessages(conv)}
-						style={{
-							padding: '15px', 
-							cursor: 'pointer', 
-							borderBottom: '1px solid #eee',
-							background: selectedUser?.id === conv.id ? '#e3f2fd' : 'transparent',
-							display: 'flex', alignItems: 'center', gap: '10px'
-						}}
-					>
-						<img 
-							src={conv.profile_pic ? `http://localhost:3000${conv.profile_pic}` : "https://via.placeholder.com/40"} 
-							style={{width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover'}} 
-						/>
-						<div style={{overflow: 'hidden'}}>
-							<div style={{fontWeight: 'bold'}}>{conv.first_name}</div>
-							<div style={{fontSize: '0.8rem', color: '#666', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis'}}>
-								{conv.lastMessage ? conv.lastMessage.content : "Start chatting!"}
-							</div>
-						</div>
-					</div>
-				))}
-			</div>
+        <div className="container">
+            <div className="chat-wrapper">
+                
+                {/* SIDEBAR */}
+                <div className="chat-sidebar">
+                    <h3>Matches</h3>
+                    {conversations.length === 0 && <p style={{padding: '25px', color: 'var(--text-muted)', fontStyle: 'italic'}}>No correspondents yet.</p>}
+                    
+                    {conversations.map(conv => (
+                        <div 
+                            key={conv.id}
+                            onClick={() => fetchMessages(conv)}
+                            className={`conv-item ${selectedUser?.id === conv.id ? 'active' : ''}`}
+                        >
+                            <img 
+                                src={conv.profile_pic ? `http://localhost:3000${conv.profile_pic}` : "https://via.placeholder.com/40"} 
+                                alt={conv.first_name}
+                            />
+                            <div style={{overflow: 'hidden', flex: 1}}>
+                                <div style={{fontFamily: 'var(--font-heading)', fontSize: '1.1rem'}}>{conv.first_name}</div>
+                                <div style={{fontSize: '0.7rem', color: 'var(--text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', textTransform: 'uppercase', letterSpacing: '0.05em'}}>
+                                    {conv.lastMessage ? conv.lastMessage.content : "New Match"}
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
 
-			{/* CHAT WINDOW */}
-			<div style={{flex: 1, display: 'flex', flexDirection: 'column'}}>
-				{selectedUser ? (
-					<>
-						{/* HEADER */}
-						<div style={{padding: '15px', borderBottom: '1px solid #ddd', background: '#fff', fontWeight: 'bold'}}>
-							To: {selectedUser.first_name} {selectedUser.last_name}
-						</div>
+                {/* MAIN WINDOW */}
+                <div className="chat-main">
+                    {selectedUser ? (
+                        <>
+                            <div className="chat-header">
+                                Conversation with {selectedUser.first_name}
+                            </div>
 
-						{/* MESSAGES */}
-						<div style={{flex: 1, padding: '20px', overflowY: 'auto', background: '#f5f5f5'}}>
-							{messages.map((msg, idx) => {
-								const isMe = msg.sender_id === currentUser?.id;
-								return (
-									<div key={idx} ref={scrollRef} style={{display: 'flex', justifyContent: isMe ? 'flex-end' : 'flex-start', marginBottom: '10px'}}>
-										<div style={{
-											maxWidth: '70%', 
-											padding: '10px 15px', 
-											borderRadius: '20px',
-											background: isMe ? '#2196F3' : 'white',
-											color: isMe ? 'white' : 'black',
-											boxShadow: '0 1px 2px rgba(0,0,0,0.1)'
-										}}>
-											{msg.content}
-										</div>
-									</div>
-								);
-							})}
-						</div>
+                            <div className="messages-container">
+                                {messages.map((msg, idx) => {
+                                    const isMe = msg.sender_id === currentUser?.id;
+                                    return (
+                                        <div key={idx} className={`message-bubble ${isMe ? 'me' : 'them'}`}>
+                                            {msg.content}
+                                        </div>
+                                    );
+                                })}
+                                <div ref={scrollRef} />
+                            </div>
 
-						{/* INPUT */}
-						<form onSubmit={handleSend} style={{padding: '15px', borderTop: '1px solid #ddd', display: 'flex', gap: '10px', background: 'white'}}>
-							<input 
-								type="text" 
-								value={newMessage} 
-								onChange={e => setNewMessage(e.target.value)}
-								placeholder="Type a message..."
-								style={{flex: 1, padding: '10px', borderRadius: '20px', border: '1px solid #ddd'}}
-							/>
-							<button type="submit" className="btn" style={{borderRadius: '20px', padding: '0 20px'}}>Send</button>
-						</form>
-					</>
-				) : (
-					<div className="center" style={{height: '100%', color: '#888'}}>
-						<h3>Select a conversation to start chatting 💬</h3>
-					</div>
-				)}
-			</div>
-		</div>
-	);
+                            <form onSubmit={handleSend} className="chat-input-area">
+                                <input 
+                                    type="text" 
+                                    value={newMessage} 
+                                    onChange={e => setNewMessage(e.target.value)}
+                                    placeholder="Write your note..."
+                                />
+                                <button type="submit" className="btn">Send</button>
+                            </form>
+                        </>
+                    ) : (
+                        <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', padding: '40px', textAlign: 'center'}}>
+                            <h3 style={{fontSize: '2rem', fontStyle: 'italic', color: 'var(--text-muted)'}}>Select a soul to start writing.</h3>
+                        </div>
+                    )}
+                </div>
+            </div>
+        </div>
+    );
 };
 
 export default Chat;

@@ -265,3 +265,119 @@ input, select, textarea {
 input:focus {
   border-bottom-color: var(--text-muted);
 }
+
+/* CHAT */
+.chat-wrapper {
+    display: flex;
+    height: 75vh;
+    border: 1px solid var(--text-main);
+    background-color: var(--bg-card);
+    margin-top: 40px;
+    border-radius: var(--radius);
+    overflow: hidden;
+}
+
+.chat-sidebar {
+    width: 320px;
+    border-right: 1px solid rgba(31, 31, 31, 0.1);
+    display: flex;
+    flex-direction: column;
+}
+
+.chat-sidebar h3 {
+    padding: 25px;
+    margin: 0;
+    font-size: 1.2rem;
+    border-bottom: 1px solid rgba(31, 31, 31, 0.1);
+    text-transform: uppercase;
+    font-family: var(--font-accent);
+    letter-spacing: 0.1em;
+}
+
+.conv-item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border-bottom: 1px solid rgba(31, 31, 31, 0.05);
+}
+
+.conv-item:hover {
+    background-color: rgba(31, 31, 31, 0.02);
+}
+
+.conv-item.active {
+    background-color: var(--accent);
+}
+
+.conv-item img {
+    width: 45px;
+    height: 45px;
+    object-fit: cover;
+    border-radius: 4px;
+}
+
+.chat-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--bg-body);
+}
+
+.chat-header {
+    padding: 20px 30px;
+    border-bottom: 1px solid rgba(31, 31, 31, 0.1);
+    font-family: var(--font-heading);
+    font-size: 1.5rem;
+    font-style: italic;
+}
+
+.messages-container {
+    flex: 1;
+    padding: 30px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.message-bubble {
+    max-width: 70%;
+    padding: 12px 18px;
+    font-family: var(--font-body);
+    font-size: 0.95rem;
+    line-height: 1.4;
+}
+
+.message-bubble.me {
+    align-self: flex-end;
+    background-color: var(--text-main);
+    color: var(--bg-body);
+    border-radius: 15px 15px 0 15px;
+}
+
+.message-bubble.them {
+    align-self: flex-start;
+    background-color: var(--white);
+    color: var(--text-main);
+    border: 1px solid var(--text-main);
+    border-radius: 15px 15px 15px 0;
+}
+
+.chat-input-area {
+    padding: 20px 30px;
+    border-top: 1px solid rgba(31, 31, 31, 0.1);
+    display: flex;
+    gap: 15px;
+}
+
+.chat-input-area input {
+    flex: 1;
+    border: none !important;
+    border-bottom: 1px solid var(--text-main) !important;
+    font-family: var(--font-heading);
+    font-size: 1.2rem;
+    padding: 5px 0;
+}
