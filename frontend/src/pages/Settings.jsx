@@ -2,12 +2,14 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
 import { toast } from "react-toastify";
+import { useAuth } from "../context/AuthContext";
 
 const Profile = () => {
 	const [profile, setProfile] = useState(null);
 	const [loading, setLoading] = useState(true);
 	const [manualCity, setManualCity] = useState("");
 	const [history, setHistory] = useState({ visits: [], likes: [] });
+	const { logout } = useAuth();
 
 	// Etats pour les formulaires
 	const [formData, setFormData] = useState({
@@ -378,7 +380,7 @@ const Profile = () => {
 			</section>
 
         {/* SECTION 5: HISTORY */}
-			<section className="settings-section" style={{ borderBottom: '1px solid rgba(0,0,0,0.1)', paddingBottom: '80px' }}>
+			<section className="settings-section" >
 				<h2>History & Connections</h2>
 				<div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '60px' }}>
 					<div>
@@ -389,6 +391,22 @@ const Profile = () => {
 						<h3 style={{ fontFamily: 'var(--font-accent)', fontSize: '0.6rem', marginBottom: '30px', textTransform: 'uppercase', color: 'var(--text-muted)' }}>Admirers (Likes)</h3>
 						<UserList users={history.likes} emptyMsg="No likes yet." />
 					</div>
+				</div>
+			</section>
+
+			{/* SECTION 6: LOGOUT */}
+			<section className="settings-section" style={{ marginTop: '100px' }}>
+				<div style={{ display: 'flex', justifyContent: 'center', padding: '40px 0' }}>
+					<button 
+						onClick={logout} 
+						className="btn btn-logout"
+						style={{ 
+							width: '100%',
+							maxWidth: '300px'
+						}}
+					>
+						Logout from Matcha
+					</button>
 				</div>
 			</section>
 		</div>

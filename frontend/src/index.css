@@ -527,3 +527,17 @@ input:focus {
 }
 
 .photo-btn.delete { color: #ff4444; border-right: 1px solid var(--text-main); }
+
+/* LOGOUT BUTTON */
+.btn-logout {
+    background-color: transparent !important;
+    color: #ff4444 !important;
+    border: 1px solid #ff4444 !important;
+}
+
+.btn-logout:hover {
+    background-color: #ff4444 !important;
+    color: var(--bg-body) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(255, 68, 68, 0.2);
+}
