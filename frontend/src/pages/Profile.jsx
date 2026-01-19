@@ -5,6 +5,7 @@ import { toast } from "react-toastify";
 const Profile = () => {
 	const [profile, setProfile] = useState(null);
 	const [loading, setLoading] = useState(true);
+	const [manualCity, setManualCity] = useState("");
 
 	// Etats pour les formulaires
 	const [formData, setFormData] = useState({
@@ -124,6 +125,39 @@ const Profile = () => {
 		}
 	};
 
+	/* MANUALLY SET LOCATION */
+	const handleManualLocation = async (e) => {
+		e.preventDefault();
+		if (!manualCity) return;
+
+		try {
+			// Utilisation de l'API OpenStreetMap
+			const geoRes = await axios.get(`https://nominatim.openstreetmap.org/search?city=${manualCity}&format=json&addressdetails=1`);
+			
+			if (geoRes.data && geoRes.data.length > 0) {
+				const data = geoRes.data[0];
+				const { lat, lon } = data;
+				
+				const address = data.address || {};
+				const normalizedCity = address.city || address.town || address.village || address.municipality || manualCity;
+
+				await axios.put("/api/users/location", {
+					latitude: parseFloat(lat),
+					longitude: parseFloat(lon),
+					city: normalizedCity
+				});
+				setManualCity(normalizedCity);
+				toast.success(`Location updated : ${manualCity}`);
+				fetchProfile();
+			} else {
+				toast.error("City not found");
+			}
+		} catch (error) {
+			console.error(error);
+			toast.error("Error while setting location manually");
+		}
+	};
+
 	/* GEOLOCATION */
 	const handleLocateMe = () => {
 		if (!navigator.geolocation)
@@ -217,6 +251,20 @@ const Profile = () => {
 					📍 Locate Me (GPS)
 				</button>
 			</div>
+
+			<form onSubmit={handleManualLocation} style={{marginTop: '15px', borderTop: '1px solid #eee', paddingTop: '10px'}}>
+				<label style={{display: 'block', marginBottom: '5px'}}>Or set manually (City):</label>
+				<div style={{display: 'flex', gap: '10px'}}>
+					<input 
+						type="text" 
+						value={manualCity} 
+						onChange={(e) => setManualCity(e.target.value)} 
+						placeholder="Paris, London..." 
+						style={{flex: 1}}
+					/>
+					<button type="submit" className="btn">Set City</button>
+				</div>
+			</form>
 
 			{/* SECTION 3: INFORMATIONS PUBLIQUES */}
 			<div className="card" style={{marginBottom: '20px', padding: '20px', border: '1px solid #ddd'}}>

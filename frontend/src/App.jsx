@@ -76,97 +76,97 @@ const Navbar = () => {
 		setShowDropdown(!showDropdown);
 	};
 
-    return (
-        <nav style={{ 
-            padding: '15px 30px', 
-            background: '#fff', 
-            borderBottom: '1px solid #ddd', 
-            display: 'flex', 
-            justifyContent: 'space-between', 
-            alignItems: 'center',
-            position: 'relative',
-            zIndex: 100
-        }}>
-            <Link to="/" style={{fontSize: '1.5rem', fontWeight: 'bold', textDecoration: 'none', color: '#E91E63'}}>🍵 Matcha</Link>
-            <Link to="/search" style={{textDecoration: 'none', color: '#333'}}>🔍 Search</Link>
-            <div style={{display: 'flex', gap: '20px', alignItems: 'center'}}>
-                <Link to="/" style={{textDecoration: 'none', color: '#333'}}>💞 Browse</Link>
-                <Link to="/chat" style={{textDecoration: 'none', color: '#333'}}>💬 Chat</Link>
-                
-                <div style={{position: 'relative'}}>
-                    <div 
-                        onClick={handleToggleNotifs} 
-                        style={{cursor: 'pointer', position: 'relative', color: '#333'}}
-                    >
-                        🔔 Notifs
-                        {unreadCount > 0 && (
-                            <span style={{
-                                position: 'absolute', top: '-8px', right: '-10px',
-                                background: 'red', color: 'white', fontSize: '0.7rem',
-                                padding: '2px 6px', borderRadius: '50%', fontWeight: 'bold'
-                            }}>
-                                {unreadCount}
-                            </span>
-                        )}
-                    </div>
+	return (
+		<nav style={{ 
+			padding: '15px 30px', 
+			background: '#fff', 
+			borderBottom: '1px solid #ddd', 
+			display: 'flex', 
+			justifyContent: 'space-between', 
+			alignItems: 'center',
+			position: 'relative',
+			zIndex: 100
+		}}>
+			<Link to="/" style={{fontSize: '1.5rem', fontWeight: 'bold', textDecoration: 'none', color: '#E91E63'}}>🍵 Matcha</Link>
+			<Link to="/search" style={{textDecoration: 'none', color: '#333'}}>🔍 Search</Link>
+			<div style={{display: 'flex', gap: '20px', alignItems: 'center'}}>
+				<Link to="/" style={{textDecoration: 'none', color: '#333'}}>💞 Browse</Link>
+				<Link to="/chat" style={{textDecoration: 'none', color: '#333'}}>💬 Chat</Link>
+				
+				<div style={{position: 'relative'}}>
+					<div 
+						onClick={handleToggleNotifs} 
+						style={{cursor: 'pointer', position: 'relative', color: '#333'}}
+					>
+						🔔 Notifs
+						{unreadCount > 0 && (
+							<span style={{
+								position: 'absolute', top: '-8px', right: '-10px',
+								background: 'red', color: 'white', fontSize: '0.7rem',
+								padding: '2px 6px', borderRadius: '50%', fontWeight: 'bold'
+							}}>
+								{unreadCount}
+							</span>
+						)}
+					</div>
 
-                    {showDropdown && (
-                        <div style={{
-                            position: 'absolute',
-                            top: '40px',
-                            right: '-50px',
-                            width: '320px',
-                            maxHeight: '400px',
-                            overflowY: 'auto',
-                            background: 'white',
-                            border: '1px solid #ddd',
-                            borderRadius: '8px',
-                            boxShadow: '0 5px 15px rgba(0,0,0,0.2)',
-                            zIndex: 1000
-                        }}>
-                            <h4 style={{padding: '10px 15px', margin: 0, borderBottom: '1px solid #eee', color: '#333'}}>Notifications</h4>
-                            
-                            {notifications.length === 0 ? (
-                                <p style={{padding: '20px', textAlign: 'center', color: '#888', margin: 0}}>No notifications</p>
-                            ) : (
-                                <div style={{display: 'flex', flexDirection: 'column'}}>
-                                    {notifications.map(n => (
-                                        <Link 
-                                            key={n.id} 
-                                            to={n.type === 'message' ? '/chat' : `/user/${n.sender_id}`}
-                                            onClick={() => setShowDropdown(false)}
-                                            style={{
-                                                textDecoration: 'none', 
-                                                color: '#333',
-                                                padding: '10px 15px', 
-                                                borderBottom: '1px solid #f5f5f5',
-                                                background: n.is_read ? 'white' : '#e3f2fd',
-                                                display: 'flex', alignItems: 'center', gap: '10px'
-                                            }}
-                                        >
-                                            <div style={{fontSize: '1.2rem'}}>{getIcon(n.type)}</div>
-                                            <img 
-                                                src={n.sender_pic ? `http://localhost:3000${n.sender_pic}` : "https://via.placeholder.com/40"} 
-                                                style={{width: '35px', height: '35px', borderRadius: '50%', objectFit: 'cover'}}
-                                            />
-                                            <div style={{fontSize: '0.9rem'}}>
-                                                <strong>{n.sender_name}</strong> {getMessage(n)}
-                                                <div style={{fontSize: '0.7rem', color: '#888', marginTop: '2px'}}>
-                                                    {new Date(n.created_at).toLocaleString()}
-                                                </div>
-                                            </div>
-                                        </Link>
-                                    ))}
-                                </div>
-                            )}
-                        </div>
-                    )}
-                </div>
+					{showDropdown && (
+						<div style={{
+							position: 'absolute',
+							top: '40px',
+							right: '-50px',
+							width: '320px',
+							maxHeight: '400px',
+							overflowY: 'auto',
+							background: 'white',
+							border: '1px solid #ddd',
+							borderRadius: '8px',
+							boxShadow: '0 5px 15px rgba(0,0,0,0.2)',
+							zIndex: 1000
+						}}>
+							<h4 style={{padding: '10px 15px', margin: 0, borderBottom: '1px solid #eee', color: '#333'}}>Notifications</h4>
+							
+							{notifications.length === 0 ? (
+								<p style={{padding: '20px', textAlign: 'center', color: '#888', margin: 0}}>No notifications</p>
+							) : (
+								<div style={{display: 'flex', flexDirection: 'column'}}>
+									{notifications.map(n => (
+										<Link 
+											key={n.id} 
+											to={n.type === 'message' ? '/chat' : `/user/${n.sender_id}`}
+											onClick={() => setShowDropdown(false)}
+											style={{
+												textDecoration: 'none', 
+												color: '#333',
+												padding: '10px 15px', 
+												borderBottom: '1px solid #f5f5f5',
+												background: n.is_read ? 'white' : '#e3f2fd',
+												display: 'flex', alignItems: 'center', gap: '10px'
+											}}
+										>
+											<div style={{fontSize: '1.2rem'}}>{getIcon(n.type)}</div>
+											<img 
+												src={n.sender_pic ? `http://localhost:3000${n.sender_pic}` : "https://via.placeholder.com/40"} 
+												style={{width: '35px', height: '35px', borderRadius: '50%', objectFit: 'cover'}}
+											/>
+											<div style={{fontSize: '0.9rem'}}>
+												<strong>{n.sender_name}</strong> {getMessage(n)}
+												<div style={{fontSize: '0.7rem', color: '#888', marginTop: '2px'}}>
+													{new Date(n.created_at).toLocaleString()}
+												</div>
+											</div>
+										</Link>
+									))}
+								</div>
+							)}
+						</div>
+					)}
+				</div>
 
-                <Link to="/profile" style={{textDecoration: 'none', color: '#333'}}>👤 My Profile</Link>
-            </div>
-        </nav>
-    );
+				<Link to="/profile" style={{textDecoration: 'none', color: '#333'}}>👤 My Profile</Link>
+			</div>
+		</nav>
+	);
 };
 
 const Layout = () => {

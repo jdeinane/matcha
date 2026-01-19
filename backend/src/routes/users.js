@@ -243,11 +243,11 @@ router.put("/account", (req, res) => {
 /* PUT LOCATION */
 router.put("/location", (req, res) => {
 	try {
-		const { latitude, longitude } = locationSchema.parse(req.body);
+		const { latitude, longitude, city } = locationSchema.parse(req.body);
 
 		// Met a jour la position
-		db.prepare("UPDATE users SET latitude = ?, longitude = ? WHERE id = ?")
-			.run(latitude, longitude, req.user.id);
+		db.prepare("UPDATE users SET latitude = ?, longitude = ?, city = ? WHERE id = ?")
+			.run(latitude, longitude, city || null, req.user.id);
 
 		res.json({ message: "Location updated" });
 
