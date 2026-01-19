@@ -17,6 +17,7 @@ import Browsing from "./pages/Browsing";
 import UserProfile from "./pages/UserProfile";
 import Chat from "./pages/Chat";
 import Search from './pages/Search';
+import Home from './pages/Home';
 
 const Navbar = () => {
 	const socket = useSocket();
@@ -91,7 +92,7 @@ const Navbar = () => {
 			<Link to="/" style={{fontSize: '1.5rem', fontWeight: 'bold', textDecoration: 'none', color: '#E91E63'}}>🍵 Matcha</Link>
 			<Link to="/search" style={{textDecoration: 'none', color: '#333'}}>🔍 Search</Link>
 			<div style={{display: 'flex', gap: '20px', alignItems: 'center'}}>
-				<Link to="/" style={{textDecoration: 'none', color: '#333'}}>💞 Browse</Link>
+				<Link to="/browse" style={{textDecoration: 'none', color: '#333'}}>💞 Browse</Link>
 				<Link to="/chat" style={{textDecoration: 'none', color: '#333'}}>💬 Chat</Link>
 				
 				<div style={{position: 'relative'}}>
@@ -225,7 +226,8 @@ function App() {
 							
 							<Route element={<Layout />}>
 								
-								<Route path="/" element={<Browsing />} />
+								<Route path="/" element={<Home />} />
+								<Route path="/browse" element={<Browsing />} />
 								<Route path="/search" element={<Search />} />
 								<Route path="/settings" element={<Profile />} />
 								<Route path="/user/:id" element={<UserProfile />} />
