@@ -243,150 +243,154 @@ const Profile = () => {
 		return <div>Loading profile...</div>;
 
 	return (
-		<div className="container" style={{maxWidth: '800px', margin: '0 auto', padding: '20px'}}>
-			<h1>My Profile</h1>
-			<p>Popularity Score (Fame): <strong>{profile.fame_rating}</strong></p>
+		<div className="container" style={{ padding: '60px 20px' }}>
+			<header style={{ marginBottom: '80px', textAlign: 'center' }}>
+				<h1 style={{ fontSize: '4rem' }}>My <span style={{ fontStyle: 'italic', color: 'var(--matcha)' }}>Curated</span> Space.</h1>
+				<p style={{ fontFamily: 'var(--font-accent)', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.2em' }}>
+					Popularity Index: {profile.fame_rating} points
+				</p>
+			</header>
 
 			{/* SECTION 1: PHOTOS */}
-			<div className="card" style={{marginBottom: '20px', padding: '20px', border: '1px solid #ddd'}}>
-				<h2>Photos ({profile.images?.length}/5)</h2>
-				<div style={{display: 'flex', gap: '10px', flexWrap: 'wrap', marginBottom: '10px'}}>
+			<section className="settings-section">
+				<h2>Visual Identity ({profile.images?.length}/5)</h2>
+				<div className="photo-manager-grid">
 					{profile.images?.map(img => (
-						<div key={img.id} style={{position: 'relative', width: '100px', height: '100px'}}>
-							<img 
-								src={`http://localhost:3000${img.file_path}`} 
-								alt="user" 
-								style={{
-									width: '100%', height: '100%', objectFit: 'cover', 
-									border: img.is_profile_pic ? '3px solid #4CAF50' : '1px solid #ccc'
-								}}
-							/>
-							<button onClick={() => handleDeletePhoto(img.id)} style={{position: 'absolute', top: 0, right: 0, background: 'red', color: 'white', border: 'none'}}>X</button>
-							{!img.is_profile_pic && (
-								<button onClick={() => handleSetProfilePic(img.id)} style={{position: 'absolute', bottom: 0, width: '100%', fontSize: '0.7rem'}}>Main</button>
-							)}
+						<div key={img.id} className="photo-slot" style={{ border: img.is_profile_pic ? '2px solid var(--matcha)' : '1px solid var(--text-main)' }}>
+							<img src={`http://localhost:3000${img.file_path}`} alt="user" />
+							<div className="photo-actions">
+								<button className="photo-btn delete" onClick={() => handleDeletePhoto(img.id)}>Remove</button>
+								{!img.is_profile_pic && (
+									<button className="photo-btn" onClick={() => handleSetProfilePic(img.id)}>Main</button>
+								)}
+							</div>
 						</div>
 					))}
 				</div>
 				{profile.images?.length < 5 && (
-					<div style={{display: 'flex', gap: '10px'}}>
-						<input type="file" onChange={e => setFile(e.target.files[0])} />
+					<div style={{ display: 'flex', gap: '20px', alignItems: 'center', marginTop: '20px' }}>
+						<input type="file" id="file-upload" onChange={e => setFile(e.target.files[0])} style={{ display: 'none' }} />
+						<label htmlFor="file-upload" className="btn" style={{ background: 'transparent', color: 'var(--text-main)', cursor: 'pointer' }}>
+							{file ? file.name : "Select Image"}
+						</label>
 						<button onClick={handleUpload} className="btn">Upload</button>
 					</div>
 				)}
-			</div>
-
-			{/* SECTION 2: GEOLOCALISATION */}
-			<div className="card" style={{marginBottom: '20px', padding: '20px', border: '1px solid #ddd'}}>
-				<h2>Location</h2>
-				<p>
-					Latitude: {profile.latitude || "Not set"} <br/>
-					Longitude: {profile.longitude || "Not set"}
-				</p>
-				<button onClick={handleLocateMe} className="btn" style={{backgroundColor: '#2196F3'}}>
-					📍 Locate Me (GPS)
-				</button>
-			</div>
-
-			<form onSubmit={handleManualLocation} style={{marginTop: '15px', borderTop: '1px solid #eee', paddingTop: '10px'}}>
-				<label style={{display: 'block', marginBottom: '5px'}}>Or set manually (City):</label>
-				<div style={{display: 'flex', gap: '10px'}}>
-					<input 
-						type="text" 
-						value={manualCity} 
-						onChange={(e) => setManualCity(e.target.value)} 
-						placeholder="Paris, London..." 
-						style={{flex: 1}}
-					/>
-					<button type="submit" className="btn">Set City</button>
-				</div>
-			</form>
-
-			{/* SECTION 3: INFORMATIONS PUBLIQUES */}
-			<div className="card" style={{marginBottom: '20px', padding: '20px', border: '1px solid #ddd'}}>
-				<h2>Public Details</h2>
-				<form onSubmit={updateProfile} className="flex-col">
-					<div className="input-group">
-						<label>Gender</label>
-						<select value={formData.gender} onChange={e => setFormData({...formData, gender: e.target.value})}>
-							<option value="male">Male</option>
-							<option value="female">Female</option>
-							<option value="other">Other</option>
-						</select>
+			</section>
+			{/* SECTION 2: BIOGRAPHY & DETAILS */}
+			<section className="settings-section">
+				<h2>The Narrative</h2>
+				<form onSubmit={updateProfile}>
+					<div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '40px' }}>
+						<div className="input-group">
+							<label>Gender Identity</label>
+							<select value={formData.gender} onChange={e => setFormData({...formData, gender: e.target.value})}>
+								<option value="male">Male</option>
+								<option value="female">Female</option>
+								<option value="other">Other</option>
+							</select>
+						</div>
+						<div className="input-group">
+							<label>Orientation</label>
+							<select value={formData.sexual_preference} onChange={e => setFormData({...formData, sexual_preference: e.target.value})}>
+								<option value="heterosexual">Heterosexual</option>
+								<option value="gay">Gay</option>
+								<option value="bisexual">Bisexual</option>
+							</select>
+						</div>
 					</div>
-					<div className="input-group">
-						<label>Sexual Preference</label>
-						<select value={formData.sexual_preference} onChange={e => setFormData({...formData, sexual_preference: e.target.value})}>
-							<option value="heterosexual">Heterosexual</option>
-							<option value="gay">Gay</option>
-							<option value="bisexual">Bisexual</option>
-						</select>
-					</div>
-					<div className="input-group">
-						<label>Biography</label>
+
+					<div className="input-group" style={{ marginTop: '30px' }}>
+						<label>Your Story (Biography)</label>
 						<textarea 
 							value={formData.biography} 
 							onChange={e => setFormData({...formData, biography: e.target.value})}
-							rows="3"
+							rows="4"
+							placeholder="Tell your story..."
 						/>
 					</div>
-					<div className="input-group">
-						<label>Tags (comma separated)</label>
+
+					<div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '40px', marginTop: '30px' }}>
+						<div className="input-group">
+							<label>Interests (tags, comma separated)</label>
+							<input 
+								type="text" 
+								value={formData.tags} 
+								onChange={e => setFormData({...formData, tags: e.target.value})} 
+								placeholder="vegan, art, coffee..."
+							/>
+						</div>
+						<div className="input-group">
+							<label>Birth Date</label>
+							<input 
+								type="date" 
+								value={formData.birthdate} 
+								onChange={e => setFormData({...formData, birthdate: e.target.value})} 
+							/>
+						</div>
+					</div>
+					<button type="submit" className="btn" style={{ marginTop: '40px' }}>Save Narrative</button>
+				</form>
+			</section>
+
+			{/* SECTION 3: LOCATION */}
+			<section className="settings-section">
+				<h2>Presence & Location</h2>
+				<p style={{ marginBottom: '20px', fontSize: '0.9rem', color: 'var(--text-muted)', fontFamily: 'var(--font-accent)', textTransform: 'uppercase' }}>
+					Current Base: {profile.city || "Unknown City"} 
+					<span style={{ marginLeft: '10px', opacity: 0.5 }}>({profile.latitude?.toFixed(2)}, {profile.longitude?.toFixed(2)})</span>
+				</p>
+				<div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap' }}>
+					<button onClick={handleLocateMe} className="btn" style={{ background: 'var(--matcha)', border: 'none' }}>Locate Me (GPS)</button>
+					<form onSubmit={handleManualLocation} style={{ flex: 1, display: 'flex', gap: '10px' }}>
 						<input 
 							type="text" 
-							value={formData.tags} 
-							onChange={e => setFormData({...formData, tags: e.target.value})} 
-							placeholder="vegan, geek, gym..."
+							value={manualCity} 
+							onChange={(e) => setManualCity(e.target.value)} 
+							placeholder="Or enter city manually..." 
+							style={{ flex: 1 }}
 						/>
-					</div>
-					<div className="input-group">
-						<label>Birth Date</label>
-						<input 
-							type="date" 
-							value={formData.birthdate} 
-							onChange={e => setFormData({...formData, birthdate: e.target.value})} 
-						/>
-					</div>
-					<button type="submit" className="btn">Update Public Profile</button>
-				</form>
-			</div>
+						<button type="submit" className="btn" style={{ background: 'transparent', color: 'var(--text-main)' }}>Update</button>
+					</form>
+				</div>
+			</section>
 
-			{/* SECTION 4: COMPTE SECURISE */}
-			<div className="card" style={{marginBottom: '20px', padding: '20px', border: '1px solid #ddd'}}>
-				<h2>🔒 Account Settings</h2>
-				<form onSubmit={updateAccount} className="flex-col">
-					<div className="input-group">
-						<label>First Name</label>
-						<input value={formData.first_name} onChange={e => setFormData({...formData, first_name: e.target.value})} />
+			{/* SECTION 4: ACCOUNT */}
+			<section className="settings-section">
+				<h2>Account Credentials</h2>
+				<form onSubmit={updateAccount}>
+					<div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '40px' }}>
+						<div className="input-group">
+							<label>First Name</label>
+							<input value={formData.first_name} onChange={e => setFormData({...formData, first_name: e.target.value})} />
+						</div>
+						<div className="input-group">
+							<label>Last Name</label>
+							<input value={formData.last_name} onChange={e => setFormData({...formData, last_name: e.target.value})} />
+						</div>
 					</div>
-					<div className="input-group">
-						<label>Last Name</label>
-						<input value={formData.last_name} onChange={e => setFormData({...formData, last_name: e.target.value})} />
-					</div>
-					<div className="input-group">
-						<label>Email</label>
+					<div className="input-group" style={{ marginTop: '30px' }}>
+						<label>Email Address</label>
 						<input type="email" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} />
 					</div>
-					<button type="submit" className="btn" style={{backgroundColor: '#FF9800'}}>Update Account</button>
+					<button type="submit" className="btn" style={{ marginTop: '40px', background: 'var(--text-main)', color: 'var(--bg-body)' }}>Update Account</button>
 				</form>
-			</div>
+			</section>
 
-			{/* SECTION 5: HISTORIQUE */}
-			<div className="card" style={{marginTop: '20px', padding: '20px', border: '1px solid #ddd'}}>
-				<h2>History</h2>
-				<div style={{marginBottom: '20px'}}>
-					<h3 style={{fontSize: '1.1rem', borderBottom: '1px solid #eee', paddingBottom: '5px'}}>
-						People who liked you
-					</h3>
-					<UserList users={history.likes} emptyMsg="No likes yet. Keep updating your profile!" />
+        {/* SECTION 5: HISTORY */}
+			<section className="settings-section" style={{ borderBottom: '1px solid rgba(0,0,0,0.1)', paddingBottom: '80px' }}>
+				<h2>History & Connections</h2>
+				<div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '60px' }}>
+					<div>
+						<h3 style={{ fontFamily: 'var(--font-accent)', fontSize: '0.6rem', marginBottom: '30px', textTransform: 'uppercase', color: 'var(--text-muted)' }}>Recent Guests</h3>
+						<UserList users={history.visits} emptyMsg="No visitors yet." />
+					</div>
+					<div>
+						<h3 style={{ fontFamily: 'var(--font-accent)', fontSize: '0.6rem', marginBottom: '30px', textTransform: 'uppercase', color: 'var(--text-muted)' }}>Admirers (Likes)</h3>
+						<UserList users={history.likes} emptyMsg="No likes yet." />
+					</div>
 				</div>
-				<div>
-					<h3 style={{fontSize: '1.1rem', borderBottom: '1px solid #eee', paddingBottom: '5px'}}>
-						👀 Recent Guests
-					</h3>
-					<UserList users={history.visits} emptyMsg="No visitors yet." />
-				</div>
-			</div>
+			</section>
 		</div>
 	);
 };

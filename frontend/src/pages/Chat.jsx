@@ -139,7 +139,7 @@ const Chat = () => {
 						</>
 					) : (
 						<div style={{display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', padding: '40px', textAlign: 'center'}}>
-							<h3 style={{fontSize: '2rem', fontStyle: 'italic', color: 'var(--text-muted)'}}>Select a soul to start writing.</h3>
+							<h3 style={{fontSize: '2rem', fontStyle: 'italic', color: 'var(--text-muted)'}}>Select conversation.</h3>
 						</div>
 					)}
 				</div>

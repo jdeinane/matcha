@@ -466,3 +466,64 @@ input:focus {
     border-radius: 50%;
     margin-right: 8px;
 }
+
+/* SETTINGS */
+.settings-section {
+    margin-bottom: 80px;
+    padding-top: 40px;
+    border-top: 1px solid rgba(31, 31, 31, 0.1);
+}
+
+.settings-section h2 {
+    font-family: var(--font-accent);
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    margin-bottom: 40px;
+    color: var(--text-muted);
+}
+
+.photo-manager-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.photo-slot {
+    position: relative;
+    aspect-ratio: 3/4;
+    border: 1px solid var(--text-main);
+    background-color: var(--bg-card);
+    overflow: hidden;
+    border-radius: 4px;
+}
+
+.photo-slot img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.photo-actions {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    display: flex;
+    background: rgba(249, 246, 225, 0.95);
+    border-top: 1px solid var(--text-main);
+}
+
+.photo-btn {
+    flex: 1;
+    padding: 8px;
+    font-family: var(--font-accent);
+    font-size: 0.5rem;
+    text-transform: uppercase;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--text-main);
+}
+
+.photo-btn.delete { color: #ff4444; border-right: 1px solid var(--text-main); }

@@ -149,7 +149,7 @@ const UserProfile = () => {
 					</div>
 					{user.is_match && !isOwnProfile && (
 						<div style={{ marginTop: '30px', padding: '15px', border: '1px solid var(--matcha)', textAlign: 'center', fontFamily: 'var(--font-heading)', fontStyle: 'italic' }}>
-							It's a Matcha! Your souls are connected.
+							It's a Matcha! You are connected.
 						</div>
 					)}
 				</div>
