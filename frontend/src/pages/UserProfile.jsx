@@ -1,19 +1,20 @@
-import { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useState, useEffect, useCallback } from "react";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import axios from "axios";
 import { toast } from "react-toastify";
+import { useAuth } from "../context/AuthContext";
 
 const UserProfile = () => {
 	const { id } = useParams();
+	const { user: currentUser } = useAuth();
+
 	const navigate = useNavigate();
 	const [user, setUser] = useState(null);
 	const [loading, setLoading] = useState(true);
 
-	useEffect(() => {
-		fetchUser();
-	}, [id]);
+	const isOwnProfile = currentUser && currentUser.id === Number(id);
 
-	const fetchUser = async() => {
+	const fetchUser = useCallback(async () => {
 		try {
 			const res = await axios.get(`/api/browsing/user/${id}`);
 			setUser(res.data);
@@ -22,7 +23,11 @@ const UserProfile = () => {
 			toast.error("User not found or blocked");
 			navigate("/");
 		}
-	};
+	}, [id, navigate]);
+
+	useEffect(() => {
+		fetchUser();
+	}, [fetchUser]);
 
 	const handleLike = async () => {
 		try {
@@ -54,7 +59,7 @@ const UserProfile = () => {
 	};
 
 	const handleReport = async () => {
-		const reason = prompt("Why are you reporting this user?");
+const reason = window.prompt("Why are you reporting this user?");
 		if (!reason)
 			return;
 
@@ -95,17 +100,28 @@ const UserProfile = () => {
 				</div>
 			</div>
 
-			{/* ACTION BUTTONS (LIKE / BLOCK) */}
-			<div style={{display: 'flex', gap: '10px', marginBottom: '20px'}}>
-				<button 
-					onClick={handleLike} 
+		<div style={{display: 'flex', gap: '10px', marginBottom: '20px'}}>
+			{isOwnProfile ? (
+				<Link 
+					to="/settings" 
 					className="btn" 
-					style={{flex: 1, backgroundColor: user.is_liked ? '#e91e63' : '#ddd', color: user.is_liked ? 'white' : 'black'}}
+					style={{flex: 1, textAlign: 'center', backgroundColor: '#2196F3', textDecoration: 'none'}}
 				>
-					{user.is_liked ? "💖 LIKED" : "🤍 LIKE"}
-				</button>
-				<button onClick={handleBlock} className="btn" style={{backgroundColor: '#333'}}>🚫 Block</button>
-				<button onClick={handleReport} className="btn" style={{backgroundColor: '#f44336'}}>⚠️ Report</button>
+					✏️ Edit My Profile
+				</Link>
+			) : (
+				<>
+					<button 
+						onClick={handleLike} 
+						className="btn" 
+						style={{flex: 1, backgroundColor: user.is_liked ? '#e91e63' : '#ddd', color: user.is_liked ? 'white' : 'black'}}
+					>
+						{user.is_liked ? "💖 LIKED" : "🤍 LIKE"}
+					</button>
+					<button onClick={handleBlock} className="btn" style={{backgroundColor: '#333'}}>🚫 Block</button>
+					<button onClick={handleReport} className="btn" style={{backgroundColor: '#f44336'}}>⚠️ Report</button>
+				</>
+			)}
 			</div>
 
 			{user.is_match && (
@@ -122,6 +138,7 @@ const UserProfile = () => {
 						<img 
 							key={img.id} 
 							src={`http://localhost:3000${img.file_path}`} 
+							alt={`${user.first_name}'s photo`}
 							style={{height: '200px', borderRadius: '8px'}} 
 						/>
 					))}
@@ -135,9 +152,13 @@ const UserProfile = () => {
 				
 				<h3>🏷️ Interests</h3>
 				<div style={{display: 'flex', gap: '5px', flexWrap: 'wrap'}}>
-					{user.tags.map(tag => (
-						<span key={tag} style={{background: '#eee', padding: '5px 10px', borderRadius: '15px', fontSize: '0.9rem'}}>#{tag}</span>
-					))}
+					{user.tags && user.tags.length > 0 ? (
+						user.tags.map(tag => (
+							<span key={tag} style={{background: '#eee', padding: '5px 10px', borderRadius: '15px', fontSize: '0.9rem'}}>#{tag}</span>
+						))
+					) : (
+						<p style={{color: '#999'}}>No interests listed</p>
+					)}
 				</div>
 
 				<h3>⚧ Info</h3>

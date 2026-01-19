@@ -4,7 +4,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import axios from "axios";
 
-import { AuthProvider } from "./context/AuthContext";
+import { useAuth, AuthProvider } from "./context/AuthContext";
 import { SocketProvider, useSocket } from "./context/SocketContext";
 
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -12,7 +12,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import VerifyEmail from "./pages/VerifyEmail";
-import Profile from "./pages/Profile";
+import Profile from "./pages/Settings";
 import Browsing from "./pages/Browsing";
 import UserProfile from "./pages/UserProfile";
 import Chat from "./pages/Chat";
@@ -21,7 +21,8 @@ import Search from './pages/Search';
 const Navbar = () => {
 	const socket = useSocket();
 	const location = useLocation(); 
-	
+	const { user } = useAuth();
+
 	const [unreadCount, setUnreadCount] = useState(0);
 	const [showDropdown, setShowDropdown] = useState(false);
 	const [notifications, setNotifications] = useState([]);
@@ -163,7 +164,17 @@ const Navbar = () => {
 					)}
 				</div>
 
-				<Link to="/profile" style={{textDecoration: 'none', color: '#333'}}>👤 My Profile</Link>
+				{user && (
+                    <>
+                        <Link to={`/user/${user.id}`} style={{textDecoration: 'none', color: '#333'}}>
+                            👤 My Profile
+                        </Link>
+                        <Link to="/settings" style={{textDecoration: 'none', color: '#333'}}>
+                            ⚙️ Settings
+                        </Link>
+                    </>
+                )}
+				
 			</div>
 		</nav>
 	);
@@ -216,7 +227,7 @@ function App() {
 								
 								<Route path="/" element={<Browsing />} />
 								<Route path="/search" element={<Search />} />
-								<Route path="/profile" element={<Profile />} />
+								<Route path="/settings" element={<Profile />} />
 								<Route path="/user/:id" element={<UserProfile />} />
 								<Route path="/chat" element={<Chat />} />
 								
