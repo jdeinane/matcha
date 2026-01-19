@@ -173,7 +173,7 @@ const Navbar = () => {
 
 const Footer = () => (
 	<footer style={{ textAlign: 'center', padding: '40px', marginTop: 'auto', fontFamily: 'var(--font-accent)', fontSize: '0.6rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.2em' }}>
-		© 2026 Matcha — jubaldo 42 Paris
+		© 2026 Matcha — 42 Paris
 	</footer>
 );
 
