@@ -13,7 +13,7 @@ router.post("/like", (req, res) => {
 		const liker_id = req.user.id;
 		const hasPhoto = db.prepare("SELECT id FROM images WHERE user_id = ? AND is_profile_pic = 1").get(liker_id);
 
-		if (!target_id || target_id == liker_id)
+		if (!target_id || target_id === liker_id)
 			return res.status(400).json({ error: "Invalid target" });
 
 		if (!hasPhoto) {
@@ -27,7 +27,7 @@ router.post("/like", (req, res) => {
 		`).get(liker_id, target_id, target_id, liker_id);
 
 		if (isBlocked)
-            return res.status(403).json({ error: "Action not allowed (blocked)" });
+			return res.status(403).json({ error: "Action not allowed (blocked)" });
 
 		// Verifier si deja like
 		const existingLike = db.prepare("SELECT id FROM likes WHERE liker_id = ? AND liked_id = ?").get(liker_id, target_id);

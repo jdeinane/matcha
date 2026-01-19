@@ -45,7 +45,7 @@ export const AuthProvider = ({ children }) => {
 	if (loading) {
 		return (
 			<div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-				<h2>Loading app... (Vérification Auth)</h2>
+				<h2>Loading app...</h2>
 			</div>
 		);
 	}

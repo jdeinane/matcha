@@ -25,7 +25,7 @@ const Login = () => {
 		<div className="container" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
 			<div className="card" style={{ width: '100%', maxWidth: '400px' }}>
 				<h1 className="center" style={{ marginBottom: '2rem' }}>🍵 Matcha</h1>
-				<h2 className="center" style={{ marginBottom: '1.5rem', fontSize: '1.2rem' }}>Connexion</h2>
+				<h2 className="center" style={{ marginBottom: '1.5rem', fontSize: '1.2rem' }}>Login</h2>
 				
 				<form onSubmit={handleSubmit(onSubmit)} className="flex-col">
 					<div className="input-group">
@@ -38,15 +38,15 @@ const Login = () => {
 					</div>
 
 					<div className="input-group">
-						<label>Mot de passe</label>
+						<label>Password</label>
 						<input 
 							type="password"
-							{...register("password", { required: "Requis" })} 
+							{...register("password", { required: "Required" })} 
 						/>
 						{errors.password && <p className="error-msg">{errors.password.message}</p>}
 					</div>
 
-					<button type="submit" className="btn">Se connecter</button>
+					<button type="submit" className="btn">Login</button>
 				</form>
 
 				<p className="center" style={{ marginTop: '1.5rem' }}>

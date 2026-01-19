@@ -220,7 +220,7 @@ router.get("/user/:id", (req, res) => {
 		if (!isBlocked) {
 			const existingVisit = db.prepare("SELECT id FROM visits WHERE visitor_id = ? AND visited_id = ? AND created_at > datetime('now', '-1 hour')").get(visitorId, targetId);
 
-			if (!existingVisit && visitorId != targetId) {
+			if (!existingVisit && visitorId !== targetId) {
 				db.prepare("INSERT INTO visits (visitor_id, visited_id) VALUES (?, ?)").run(visitorId, targetId);
 				db.prepare("INSERT INTO notifications (recipient_id, sender_id, type) VALUES (?, ?, 'visit')").run(targetId, visitorId);
 			
