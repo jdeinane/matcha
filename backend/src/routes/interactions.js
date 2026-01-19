@@ -11,9 +11,14 @@ router.post("/like", (req, res) => {
 	try {
 		const { target_id } = req.body;
 		const liker_id = req.user.id;
+		const hasPhoto = db.prepare("SELECT id FROM images WHERE user_id = ? AND is_profile_pic = 1").get(liker_id);
 
 		if (!target_id || target_id == liker_id)
 			return res.status(400).json({ error: "Invalid target" });
+
+		if (!hasPhoto) {
+			return res.status(403).json({ error: "You must have a profile picture to like users." });
+		}
 
 		const isBlocked = db.prepare(`
 			SELECT 1 FROM blocks 
