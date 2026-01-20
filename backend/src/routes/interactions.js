@@ -2,6 +2,7 @@ import express from "express";
 import { db } from "../db.js";
 import { verifyToken } from "../middlewares/authMiddleware.js";
 import { notifyUser } from "../socket.js";
+import { sendEmail } from "../email.js";
 
 const router = express.Router();
 router.use(verifyToken);
@@ -159,21 +160,36 @@ router.post("/unblock", (req, res) => {
 });
 
 /* POST REPORT: Report user */
-router.post("/report", (req, res) => {
-	try {
-		const { target_id, reason } = req.body;
-		const reporterId = req.user.id;
+router.post("/report", async (req, res) => {
+    try {
+        const { target_id, reason } = req.body;
+        const reporterId = req.user.id;
 
-		// Inserer le signalement
-		db.prepare("INSERT OR IGNORE INTO reports (reporter_id, reported_id, reason) VALUES (?, ?, ?)").run(reporterId, target_id, reason || "No reason");
+        db.prepare("INSERT OR IGNORE INTO reports (reporter_id, reported_id, reason) VALUES (?, ?, ?)").run(reporterId, target_id, reason || "No reason");
 
-		// TODO: Envoyer un mail a l'admin
-		res.json({ message: "User reported" });
+        
+        const reporter = db.prepare("SELECT username FROM users WHERE id = ?").get(reporterId);
+        const reported = db.prepare("SELECT username, email FROM users WHERE id = ?").get(target_id);
 
-	} catch (error) {
-		console.error(error);
-		res.status(500).json({ error: "Server error" });
-	}
+        const adminEmail = "admin@matcha.com";
+        const subject = `[REPORT] User Reported: ${reported.username}`;
+        const html = `
+            <h3>New User Report</h3>
+            <p><strong>Reporter:</strong> ${reporter.username} (ID: ${reporterId})</p>
+            <p><strong>Reported User:</strong> ${reported.username} (ID: ${target_id})</p>
+            <p><strong>Reason:</strong> ${reason || "No reason provided"}</p>
+            <br>
+            <p>Please check the admin panel.</p>
+        `;
+
+        sendEmail(adminEmail, subject, html); 
+
+        res.json({ message: "User reported" });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Server error" });
+    }
 });
 
 export default router;
