@@ -98,6 +98,11 @@ router.get("/suggestions", (req, res) => {
 
 			const userTagIds = db.prepare("SELECT tag_id FROM user_tags WHERE user_id = ?").all(user.id).map(t => t.tag_id);
 			const commonTags = userTagIds.filter(id => myTags.includes(id)).length;
+			const tags = db.prepare(`
+					SELECT t.name FROM tags t
+					JOIN user_tags ut ON ut.tag_id = t.id
+					WHERE ut.user_id = ?
+				`).all(user.id).map(t => t.name);
 
 			// SCORE DE MATCHING
 			// Algo exemple:
@@ -113,7 +118,7 @@ router.get("/suggestions", (req, res) => {
 			
 			score += (user.fame_rating || 0) * 0.5;
 
-			return { ...user, distance, age, commonTags, score };
+			return { ...user, distance, age, commonTags, score, tags };
 		});
 
 		// 5. Trier par Score (descendant)
