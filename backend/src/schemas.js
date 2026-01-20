@@ -1,6 +1,7 @@
 import { z } from "zod";
-
+import zxcvbn from "zxcvbn";
 export const registerSchema = z.object({
+
 	username: z.string()
 		.trim()
 		.min(3, "Username must be at least 3 characters long")
@@ -25,7 +26,11 @@ export const registerSchema = z.object({
 		.max(32, "Password must not exceed 32 characters")
 		.regex(/[A-Z]/, "Password must include at least one uppercase letter")
 		.regex(/[0-9]/, "Password must include at least one number")
-		.regex(/[^A-Za-z0-9]/, "Password must include at least one special character"),
+		.regex(/[^A-Za-z0-9]/, "Password must include at least one special character")
+		.refine((val) => {
+			const result = zxcvbn(val);
+			return result.score >= 3;
+        }, { message: "Password is too common (e.g., standard dictionary words or sequences)." }),
 	birthdate: z.string().refine((date) => {
 		const birth = new Date(date);
 		const now = new Date();
