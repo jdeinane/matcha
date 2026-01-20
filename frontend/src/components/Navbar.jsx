@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import axios from "axios";
+
 import { useAuth } from "../context/AuthContext";
 import { useSocket } from "../context/SocketContext";
 
@@ -54,18 +55,35 @@ const Navbar = () => {
 
 	if (!user) return null;
 
-	// CONFIGURATION DU STYLE CRÈME ET AGRANDI
-	const iconStyle = {
+	const navItemStyle = {
 		cursor: 'pointer',
-		fontSize: '1.6rem', // Taille augmentée pour la visibilité
+		fontFamily: 'var(--font-accent)',
+		fontSize: '0.75rem',
+		textTransform: 'uppercase',
+		letterSpacing: '0.15em',
+		color: '#F5F5DC', 
 		display: 'flex',
 		alignItems: 'center',
-		color: '#F5F5DC',   // Couleur Crème harmonisée
-		transition: 'all 0.2s ease-in-out',
+		textDecoration: 'none',
 		background: 'none',
 		border: 'none',
-		padding: '5px',
-		textDecoration: 'none',
+		padding: '5px 0',
+		transition: 'opacity 0.2s ease',
+		lineHeight: '1'
+	};
+
+	const iconOnlyStyle = {
+		cursor: 'pointer',
+		color: '#F5F5DC', 
+		display: 'flex',
+		alignItems: 'center',
+		justifyContent: 'center',
+		background: 'none',
+		border: 'none',
+		padding: '0',
+		marginLeft: '25px',
+		fontSize: '1.1rem',
+		transition: 'opacity 0.3s',
 		lineHeight: '1'
 	};
 
@@ -73,47 +91,51 @@ const Navbar = () => {
 		<nav>
 			<Link to="/" className="logo-text">Matcha.</Link>
 			
-			<div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+			<div style={{ display: 'flex', alignItems: 'center' }}>
 				<Link to="/search" className="nav-link">Search</Link>
 				<Link to="/browse" className="nav-link">Discover</Link>
 				<Link to="/chat" className="nav-link">Chat</Link>
 				<Link to={`/user/${user.id}`} className="nav-link">Profile</Link>
-				
-				<Link to="/settings" style={iconStyle} title="Settings" className="nav-icon-hover">
-					⚙
-				</Link>
 
 				<div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-					<div 
+					<button 
 						onClick={handleToggleNotifs} 
-						style={iconStyle}
-						title="Notifications"
-						className="nav-icon-hover"
+						className="nav-item"
+						style={{ 
+							background: 'none', 
+							border: 'none', 
+							padding: 0, 
+							color: '#F5F5DC',
+							display: 'flex',
+							alignItems: 'center'
+						}}
 					>
-						{unreadCount > 0 ? "🔔" : "🛎"}
+						Notifs
 						{unreadCount > 0 && (
-							<span className="notif-badge" style={{ 
+							<span style={{ 
 								backgroundColor: 'var(--matcha)', 
 								color: 'white',
-								top: '-2px',
-								right: '-2px',
+								marginLeft: '8px',
 								fontSize: '0.6rem',
-								minWidth: '16px',
-								height: '16px',
-								display: 'flex',
+								minWidth: '18px',
+								height: '18px',
+								display: 'inline-flex',
 								alignItems: 'center',
-								justifyContent: 'center'
+								justifyContent: 'center',
+								borderRadius: '50%',
+								fontWeight: 'bold',
+								border: '1px solid #F5F5DC'
 							}}>
 								{unreadCount}
 							</span>
 						)}
-					</div>
+					</button>
 
 					{showDropdown && (
 						<div className="dropdown-menu">
 							<h4>Recently</h4>
 							{notifications.length === 0 ? (
-								<p style={{ padding: '30px', textAlign: 'center', fontStyle: 'italic' }}>
+								<p style={{ padding: '30px', textAlign: 'center', fontStyle: 'italic', color: 'var(--text-main)', textTransform: 'none', letterSpacing: 'normal' }}>
 									Nothing going on here.
 								</p>
 							) : (
@@ -142,11 +164,15 @@ const Navbar = () => {
 						</div>
 					)}
 				</div>
+
+				<Link to="/settings" style={iconOnlyStyle} title="Settings" className="nav-item-icon">
+					⚙
+				</Link>
+
 				<button 
 					onClick={logout}
-					style={iconStyle}
+					style={{ ...iconOnlyStyle, fontSize: '0.9rem' }}
 					title="Logout"
-					className="nav-icon-hover"
 				>
 					⏻
 				</button>
