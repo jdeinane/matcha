@@ -45,10 +45,15 @@ const GlobalNotifications = () => {
 		if (!socket) return;
 
 		const handleNotification = (data) => {
-			if (data.type === 'match') toast.success(`💖 ${data.message}`);
-			if (window.location.pathname === '/chat') return;
-			else if (data.type === 'like') toast.info(`👍 ${data.message}`);
-			else if (data.type !== 'message') toast.info(data.message);
+			if (data.type === 'match') {
+				toast.success(`💖 ${data.message}`);
+			} else if (window.location.pathname === '/chat') {
+				return;
+			} else if (data.type === 'like') {
+				toast.info(`👍 ${data.message}`);
+			} else if (data.type !== 'message') {
+				toast.info(data.message);
+			}
 		};
 
 		const handleNewMessage = (msg) => {
