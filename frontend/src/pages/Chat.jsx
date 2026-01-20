@@ -22,23 +22,26 @@ const Chat = () => {
 
 	// 2. Écouter les messages entrants
 	useEffect(() => {
-		if (!socket) return;
-		
-		socket.on("message", (msg) => {
-			if (selectedUser && (msg.sender_id === selectedUser.id || msg.sender_id === currentUser.id)) {
-				const isRelatedToCurrentConv = 
-				(msg.sender_id === selectedUser.id) || 
-				(msg.sender_id === currentUser.id && msg.receiver_id === selectedUser.id);
+			if (!socket) return;
+						const handleIncomingMessage = (msg) => {
+				if (selectedUser && (msg.sender_id === selectedUser.id || msg.sender_id === currentUser.id)) {
+					const isRelatedToCurrentConv = 
+					(msg.sender_id === selectedUser.id) || 
+					(msg.sender_id === currentUser.id && msg.receiver_id === selectedUser.id);
 
-				if (isRelatedToCurrentConv) {
-					setMessages(prev => [...prev, msg]);
+					if (isRelatedToCurrentConv) {
+						setMessages(prev => [...prev, msg]);
+					}
 				}
-			}
-			fetchConversations();
-		});
+				fetchConversations();
+			};
 
-		return () => socket.off("message");
-	}, [socket, selectedUser, currentUser]);
+			socket.on("message", handleIncomingMessage);
+
+			return () => {
+				socket.off("message", handleIncomingMessage);
+			};
+		}, [socket, selectedUser, currentUser]);
 
 	// 3. Auto-scroll vers le bas
 	useEffect(() => {

@@ -41,6 +41,7 @@ const Layout = () => {
 
 const GlobalNotifications = () => {
 	const socket = useSocket();
+	
 	useEffect(() => {
 		if (!socket) return;
 
@@ -57,11 +58,8 @@ const GlobalNotifications = () => {
 		};
 
 		const handleNewMessage = (msg) => {
-			console.log("Message reçu pour Toast:", msg);
 			if (window.location.pathname !== '/chat') {
-                toast.info(`💬 New message from ${msg.sender_name}`, { 
-                    toastId: `msg-${msg.sender_id}` 
-                });
+				toast.info(`💬 New message from ${msg.sender_name || 'someone'}`);
 			}
 		};
 
@@ -73,6 +71,7 @@ const GlobalNotifications = () => {
 			socket.off("message", handleNewMessage);
 		};
 	}, [socket]);
+	
 	return null;
 };
 
