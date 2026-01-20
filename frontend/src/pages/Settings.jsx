@@ -339,14 +339,6 @@ const Profile = () => {
 								placeholder="vegan, art, coffee..."
 							/>
 						</div>
-						<div className="input-group">
-							<label>Birth Date</label>
-							<input 
-								type="date" 
-								value={formData.birthdate} 
-								onChange={e => setFormData({...formData, birthdate: e.target.value})} 
-							/>
-						</div>
 					</div>
 					<button type="submit" className="btn" style={{ marginTop: '40px' }}>Save Narrative</button>
 				</form>

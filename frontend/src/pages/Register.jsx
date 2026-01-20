@@ -61,6 +61,15 @@ const Register = () => {
 					</div>
 
 					<div className="input-group">
+						<label>Birth Date</label>
+						<input 
+							type="date"
+							{...register("birthdate", { required: "Birth date is required" })} 
+						/>
+						{errors.birthdate && <p className="error-msg">{errors.birthdate.message}</p>}
+					</div>
+
+					<div className="input-group">
 						<label>Password</label>
 						<input 
 							type="password"

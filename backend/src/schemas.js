@@ -25,6 +25,14 @@ export const registerSchema = z.object({
 		.regex(/[A-Z]/, "Password must include at least one uppercase letter")
 		.regex(/[0-9]/, "Password must include at least one number")
 		.regex(/[^A-Za-z0-9]/, "Password must include at least one special character"),
+	birthdate: z.string().refine((date) => {
+		const birth = new Date(date);
+		const now = new Date();
+		let age = now.getFullYear() - birth.getFullYear();
+		const m = now.getMonth() - birth.getMonth();
+		if (m < 0 || (m === 0 && now.getDate() < birth.getDate())) age--;
+		return age >= 18;
+	}, { message: "You must be at least 18 years old to join Matcha." }),
 });
 
 export const loginSchema = z.object({
@@ -50,9 +58,6 @@ export const profileSchema = z.object({
 	sexual_preference: z.enum(["heterosexual", "gay", "bisexual"]),
 	biography: z.string().max(1000).optional(),
 	tags: z.array(z.string()).optional(),
-	birthdate: z.string().refine((date) => !isNaN(Date.parse(date)), {
-        message: "Invalid date format",
-	}).optional()
 });
 
 export const updateAccountSchema = z.object({

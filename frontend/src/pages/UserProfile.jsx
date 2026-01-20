@@ -109,7 +109,7 @@ const UserProfile = () => {
 						<span className="status-indicator" style={{ background: user.is_online ? 'var(--matcha)' : '#ccc' }}></span>
 						{user.is_online ? "Currently Online" : `Last seen ${user.last_seen || "recently"}`}
 						<br /><br />
-						{user.age} Years — Based in {user.city}
+						{user.age} Years Old — Based in {user.city}
 					</div>
 					<div className="profile-section">
 						<h3>About</h3>
@@ -121,7 +121,7 @@ const UserProfile = () => {
 					</div>
 					<div style={{ marginTop: '40px' }}>
 						{isOwnProfile ? (
-							<Link to="/settings" className="btn" style={{ width: '100%' }}>Edit My Archive</Link>
+							<Link to="/settings" className="btn" style={{ width: '10%' }}>Edit</Link>
 						) : (
 							<div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
 								<div style={{ display: 'flex', gap: '10px' }}>

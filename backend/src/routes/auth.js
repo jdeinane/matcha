@@ -39,8 +39,8 @@ router.post("/register", async (req, res) => {
 
 		// 5. Insertion en BDD
 		const insertUser = db.prepare(`
-			INSERT INTO users (username, email, first_name, last_name, password_hash, verify_token, verify_token_expires_at)
-			VALUES (?, ?, ?, ?, ?, ?, datetime('now', '+24 hours'))
+			INSERT INTO users (username, email, first_name, last_name, password_hash, verify_token, verify_token_expires_at, birthdate)
+			VALUES (?, ?, ?, ?, ?, ?, datetime('now', '+24 hours'), ?)
 		`);
 
 		insertUser.run(
@@ -49,7 +49,8 @@ router.post("/register", async (req, res) => {
 			validatedData.first_name,
 			validatedData.last_name,
 			hashedPassword,
-			verifyToken
+			verifyToken,
+			validatedData.birthdate
 		);
 
 		const verifyLink = `http://localhost:5173/verify/${verifyToken}`;

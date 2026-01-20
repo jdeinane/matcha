@@ -72,14 +72,14 @@ router.get("/profile", (req, res) => {
 /* PUT PROFILE */
 router.put("/profile", (req, res) => {
 	try {
-		const { gender, sexual_preference, biography, tags, birthdate } = profileSchema.parse(req.body);
+		const { gender, sexual_preference, biography, tags } = profileSchema.parse(req.body);
 
 		const updateUser = db.prepare(`
 			UPDATE users
-			SET gender = ?, sexual_preference = ?, biography = ?, birthdate = ?
+			SET gender = ?, sexual_preference = ?, biography = ?
 			WHERE id = ?
 		`);
-		updateUser.run(gender, sexual_preference, biography, birthdate || "", req.user.id);
+		updateUser.run(gender, sexual_preference, biography, req.user.id);
 
 		const deleteTags = db.prepare("DELETE FROM user_tags WHERE user_id = ?");
 		deleteTags.run(req.user.id);
