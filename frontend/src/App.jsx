@@ -62,7 +62,7 @@ const GlobalNotifications = () => {
 		socket.on("message", handleNewMessage);
 
 		return () => {
-			socket.off("notification", handleIncomingData);
+			socket.off("notification", handleNotification);
 			socket.off("message", handleNewMessage);
 		};
 	}, [socket]);
