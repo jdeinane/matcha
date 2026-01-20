@@ -182,7 +182,7 @@ router.get("/search", (req, res) => {
 /* GET USER PROFILE (PUBLIC): Visit a profile */
 router.get("/user/:id", (req, res) => {
 	try {
-		const targetId = req.params.id;
+		const targetId = parseInt(req.params.id);
 		const visitorId = req.user.id;
 
 		// 1. Recuperer le user
@@ -210,22 +210,23 @@ router.get("/user/:id", (req, res) => {
 
 		// 4. Enregistrer la visite (historique)
 		// On verifie si une visite recente existe deja pour pas spam la DB
-	
-		const isBlocked = db.prepare(`
-            SELECT 1 FROM blocks 
-            WHERE (blocker_id = ? AND blocked_id = ?) 
-            OR (blocker_id = ? AND blocked_id = ?)
-        `).get(visitorId, targetId, targetId, visitorId);
+		if (visitorId !== targetId) {
+			const isBlocked = db.prepare(`
+				SELECT 1 FROM blocks 
+				WHERE (blocker_id = ? AND blocked_id = ?) 
+				OR (blocker_id = ? AND blocked_id = ?)
+			`).get(visitorId, targetId, targetId, visitorId);
 
-		if (!isBlocked) {
-			const existingVisit = db.prepare("SELECT id FROM visits WHERE visitor_id = ? AND visited_id = ? AND created_at > datetime('now', '-1 hour')").get(visitorId, targetId);
+			if (!isBlocked) {
+				const existingVisit = db.prepare("SELECT id FROM visits WHERE visitor_id = ? AND visited_id = ? AND created_at > datetime('now', '-1 hour')").get(visitorId, targetId);
 
-			if (!existingVisit && visitorId !== targetId) {
-				db.prepare("INSERT INTO visits (visitor_id, visited_id) VALUES (?, ?)").run(visitorId, targetId);
-				db.prepare("INSERT INTO notifications (recipient_id, sender_id, type) VALUES (?, ?, 'visit')").run(targetId, visitorId);
-			
-				// Socket
-				notifyUser(targetId, "notification", { type: "visit", sender_name: req.user.username });
+				if (!existingVisit && visitorId !== targetId) {
+					db.prepare("INSERT INTO visits (visitor_id, visited_id) VALUES (?, ?)").run(visitorId, targetId);
+					db.prepare("INSERT INTO notifications (recipient_id, sender_id, type) VALUES (?, ?, 'visit')").run(targetId, visitorId);
+				
+					// Socket
+					notifyUser(targetId, "notification", { type: "visit", sender_name: req.user.username, sender_id: visitorId });
+				}
 			}
 		}
 		
