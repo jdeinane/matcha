@@ -46,7 +46,12 @@ router.post("/like", (req, res) => {
 			db.prepare("INSERT INTO notifications (recipient_id, sender_id, type) VALUES (?, ?, 'match')").run(liker_id, target_id);
 			
 			// Sockets
-			notifyUser(target_id, "notification", { type: "match", message: `Match with ${req.user.username}` });
+			notifyUser(target_id, "notification", {
+				type: "match",
+				message: `Match with ${req.user.username}`,
+				sender_id: liker_id
+			});
+			
 			notifyUser(liker_id, "notification", { type: "match", message: "It's a Match!" });
 
 			return res.json({ message: "It's a match!", is_match: true, success: true });

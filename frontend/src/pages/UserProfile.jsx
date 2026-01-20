@@ -2,11 +2,14 @@ import { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import axios from "axios";
 import { toast } from "react-toastify";
+
+import { useSocket } from "../context/SocketContext";
 import { useAuth } from "../context/AuthContext";
 
 const UserProfile = () => {
 	const { id } = useParams();
 	const { user: currentUser } = useAuth();
+	const socket = useSocket();
 
 	const navigate = useNavigate();
 	const [user, setUser] = useState(null);
@@ -61,15 +64,29 @@ const UserProfile = () => {
 		try {
 			if (user.is_liked) {
 				await axios.post("/api/interactions/unlike", { target_id: user.id });
-				setUser({ ...user, is_liked: false, is_match: false, fame_rating: Math.max(0, user.fame_rating - 5) });
+				setUser(prev => ({
+					...prev,
+					is_liked: false,
+					is_match: false,
+					fame_rating: Math.max(0, prev.fame_rating - 5)
+				}));
 				toast.info("Unliked");
 			} else {
-				await axios.post("/api/interactions/like", { target_id: user.id });
-				setUser({ ...user, is_liked: true, fame_rating: user.fame_rating + 5 });
-				toast.success("Liked!");
+				const res = await axios.post("/api/interactions/like", { target_id: user.id });
+
+				const hasMatched = res.data.is_match === true;
+
+				setUser(prev => ({
+					...prev,
+					is_liked: true,
+					is_match: hasMatched,
+					fame_rating: prev.fame_rating + 5
+				}));
 			}
+	
 		} catch (error) {
-			toast.error("Action failed: You must add profile picture first");
+			const errorMsg = error.response?.data?.error || "Action failed";
+			toast.error(errorMsg);
 		}
 	};
 
@@ -98,6 +115,38 @@ const UserProfile = () => {
 			toast.error("Error reporting user");
 		}
 	};
+
+	useEffect(() => {
+		if (!socket || !user) return;
+
+		const handleMatchUpdate = (data) => {
+			if (data.type === 'match' && Number(id) === Number(data.sender_id)) {
+				setUser(prev => ({
+					...prev,
+					is_match: true,
+					is_liked: true
+				}));
+			}
+		};
+
+		const handleUnmatchUpdate = (data) => {
+			if (Number(id) === Number(data.user_id)) {
+				setUser(prev => ({
+					...prev,
+					is_match: false,
+					is_liked: false
+				}));
+			}
+		};
+
+		socket.on("notification", handleMatchUpdate);
+		socket.on("unmatch", handleUnmatchUpdate);
+
+		return () => {
+			socket.off("notification", handleMatchUpdate);
+			socket.off("unmatch", handleUnmatchUpdate);
+		};
+	}, [socket, user, id]);
 
 	if (loading)
 		return <div className="container center">Loading profile...</div>;
@@ -141,49 +190,46 @@ const UserProfile = () => {
 					<div style={{ marginTop: '10px', fontSize: '0.65rem', letterSpacing: '0.1em', opacity: 0.8 }}>
 						POPULARITY INDEX: <span style={{ color: 'var(--matcha)', fontWeight: 'bold' }}>{user.fame_rating} PTS</span>
 					</div>
+				</div>
+				<div className="profile-section">
+					<h3>About</h3>
+					<p style={{ fontSize: '1.1rem', fontStyle: 'italic' }}>{user.biography || "Silence is my biography."}</p>
+				</div>
+				<div className="profile-section">
+					<h3>Interests</h3>
+					<div>{user.tags?.map(tag => <span key={tag} className="tag-pill">#{tag}</span>)}</div>
+				</div>
+				<div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+					<div style={{ display: 'flex', gap: '10px' }}>
+						<button 
+							onClick={handleLike} 
+							className="btn" 
+							style={{ 
+								flex: 1, 
+								background: user.is_liked ? 'transparent' : 'var(--text-main)', 
+								color: user.is_liked ? 'var(--text-main)' : 'var(--bg-body)' 
+							}}
+						>
+							{user.is_match ? "Unmatch" : user.is_liked ? "Waiting for a match.." : "Connect"}
+						</button>
 
-					</div>
-					<div className="profile-section">
-						<h3>About</h3>
-						<p style={{ fontSize: '1.1rem', fontStyle: 'italic' }}>{user.biography || "Silence is my biography."}</p>
-					</div>
-					<div className="profile-section">
-						<h3>Interests</h3>
-						<div>{user.tags?.map(tag => <span key={tag} className="tag-pill">#{tag}</span>)}</div>
-					</div>
-					<div style={{ marginTop: '40px' }}>
-						{isOwnProfile ? (
-							<Link to="/settings" className="btn" style={{ width: '10%' }}>Edit</Link>
-						) : (
-							<div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-								<div style={{ display: 'flex', gap: '10px' }}>
-									<button 
-										onClick={handleLike} 
-										className="btn" 
-										style={{ 
-											flex: 1, 
-											background: user.is_liked ? 'transparent' : 'var(--text-main)', 
-											color: user.is_liked ? 'var(--text-main)' : 'var(--bg-body)' 
-										}}
-									>
-										{user.is_liked ? "Waiting for a Match.." : "Connect"}
-									</button>
-									{user.is_match && (
-										<Link to="/chat" className="btn" style={{ flex: 1 }}>Send Message</Link>
-									)}
-								</div>
-								<div style={{ display: 'flex', gap: '20px', marginTop: '10px', borderTop: '1px solid rgba(0,0,0,0.05)', paddingTop: '20px' }}>
-									<button onClick={handleReport} style={{ background: 'none', border: 'none', fontFamily: 'var(--font-accent)', fontSize: '0.6rem', cursor: 'pointer', textTransform: 'uppercase', color: 'var(--text-muted)' }}>Report Account</button>
-									<button onClick={handleBlock} style={{ background: 'none', border: 'none', fontFamily: 'var(--font-accent)', fontSize: '0.6rem', cursor: 'pointer', textTransform: 'uppercase', color: '#ff4444' }}>Block User</button>
-								</div>
-							</div>
+						{user.is_match && (
+							<Link to="/chat" className="btn" style={{ flex: 1, background: 'var(--matcha)', color: 'white' }}>
+								Send Message
+							</Link>
 						)}
 					</div>
-					{user.is_match && !isOwnProfile && (
-						<div style={{ marginTop: '30px', padding: '15px', border: '1px solid var(--matcha)', textAlign: 'center', fontFamily: 'var(--font-heading)', fontStyle: 'italic' }}>
-							It's a Matcha! You are connected.
-						</div>
-					)}
+					
+					<div style={{ display: 'flex', gap: '20px', marginTop: '10px', borderTop: '1px solid rgba(0,0,0,0.05)', paddingTop: '20px' }}>
+						<button onClick={handleReport} style={{ background: 'none', border: 'none', fontFamily: 'var(--font-accent)', fontSize: '0.6rem', cursor: 'pointer', textTransform: 'uppercase', color: 'var(--text-muted)' }}>Report Account</button>
+						<button onClick={handleBlock} style={{ background: 'none', border: 'none', fontFamily: 'var(--font-accent)', fontSize: '0.6rem', cursor: 'pointer', textTransform: 'uppercase', color: '#ff4444' }}>Block User</button>
+					</div>
+				</div>
+				{user.is_match && !isOwnProfile && (
+					<div style={{ marginTop: '30px', padding: '15px', border: '1px solid var(--matcha)', textAlign: 'center', fontFamily: 'var(--font-heading)', fontStyle: 'italic' }}>
+						It's a Matcha! You are connected.
+					</div>
+				)}
 				</div>
 			</div>
 		</div>
