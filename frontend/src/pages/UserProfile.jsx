@@ -134,7 +134,6 @@ const UserProfile = () => {
 				setUser(prev => ({
 					...prev,
 					is_match: false,
-					is_liked: false
 				}));
 			}
 		};
