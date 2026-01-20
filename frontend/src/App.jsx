@@ -59,7 +59,9 @@ const GlobalNotifications = () => {
 		const handleNewMessage = (msg) => {
 			console.log("Message reçu pour Toast:", msg);
 			if (window.location.pathname !== '/chat') {
-				toast.info(`💬 New message from ${msg.sender_name || 'someone'}`);
+                toast.info(`💬 New message from ${msg.sender_name}`, { 
+                    toastId: `msg-${msg.sender_id}` 
+                });
 			}
 		};
 
