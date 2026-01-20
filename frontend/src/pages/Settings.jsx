@@ -266,28 +266,74 @@ const Profile = () => {
 			<header style={{ marginBottom: '80px', textAlign: 'center' }}>
 				<h1 style={{ fontSize: '4rem' }}>My <span style={{ fontStyle: 'italic', color: 'var(--matcha)' }}>Curated</span> Space.</h1>
 				<p style={{ fontFamily: 'var(--font-accent)', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.2em' }}>
-					Popularity Index: {profile.fame_rating} points
+					Popularity Index: {profile?.fame_rating} points
 				</p>
 			</header>
 
+			{/* INDICATEUR DE COMPLÉTION */}
+			{profile?.images?.length === 0 && (
+				<div style={{ 
+					background: 'var(--accent)', 
+					padding: '20px', 
+					marginBottom: '40px', 
+					borderRadius: 'var(--radius)',
+					border: '1px solid var(--matcha)',
+					fontSize: '0.8rem',
+					fontFamily: 'var(--font-accent)',
+					textTransform: 'uppercase',
+					textAlign: 'center',
+					letterSpacing: '0.1em'
+				}}>
+					✨ Your profile is invisible to others until you upload at least one photo.
+				</div>
+			)}
+
 			{/* SECTION 1: PHOTOS */}
 			<section className="settings-section">
-				<h2>Visual Identity ({profile.images?.length}/5)</h2>
-				<div className="photo-manager-grid">
-					{profile.images?.map(img => (
-						<div key={img.id} className="photo-slot" style={{ border: img.is_profile_pic ? '2px solid var(--matcha)' : '1px solid var(--text-main)' }}>
-							<img src={`http://localhost:3000${img.file_path}`} alt="user" />
-							<div className="photo-actions">
-								<button className="photo-btn delete" onClick={() => handleDeletePhoto(img.id)}>Remove</button>
-								{!img.is_profile_pic && (
-									<button className="photo-btn" onClick={() => handleSetProfilePic(img.id)}>Main</button>
-								)}
+				<h2>Visual Identity ({profile?.images?.length}/5)</h2>
+				
+				{profile?.images?.length === 0 ? (
+					<div 
+						onClick={() => document.getElementById('file-upload').click()}
+						style={{
+							width: '100%',
+							maxWidth: '300px',
+							aspectRatio: '3/4',
+							border: '2px dashed var(--text-main)',
+							display: 'flex',
+							flexDirection: 'column',
+							alignItems: 'center',
+							justifyContent: 'center',
+							cursor: 'pointer',
+							backgroundColor: 'rgba(106, 138, 79, 0.05)',
+							borderRadius: 'var(--radius)',
+							transition: 'all 0.3s ease',
+							margin: '0 auto 30px auto'
+						}}
+					>
+						<span style={{ fontSize: '2.5rem', marginBottom: '15px' }}>📸</span>
+						<p style={{ fontFamily: 'var(--font-accent)', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+							Upload your first memory
+						</p>
+					</div>
+				) : (
+					<div className="photo-manager-grid">
+						{profile?.images?.map(img => (
+							<div key={img.id} className="photo-slot" style={{ border: img.is_profile_pic ? '2px solid var(--matcha)' : '1px solid var(--text-main)' }}>
+								<img src={`http://localhost:3000${img.file_path}`} alt="user" />
+								<div className="photo-actions">
+									<button className="photo-btn delete" onClick={() => handleDeletePhoto(img.id)}>Remove</button>
+									{!img.is_profile_pic && (
+										<button className="photo-btn" onClick={() => handleSetProfilePic(img.id)}>Main</button>
+									)}
+								</div>
 							</div>
-						</div>
-					))}
-				</div>
-				{profile.images?.length < 5 && (
-					<div style={{ display: 'flex', gap: '20px', alignItems: 'center', marginTop: '20px' }}>
+						))}
+					</div>
+				)}
+				
+				{profile?.images?.length < 5 && (
+					<div style={{ display: 'flex', gap: '20px', alignItems: 'center', marginTop: '20px', justifyContent: 'center' }}>
 						<input type="file" id="file-upload" onChange={e => setFile(e.target.files[0])} style={{ display: 'none' }} />
 						<label htmlFor="file-upload" className="btn" style={{ background: 'transparent', color: 'var(--text-main)', cursor: 'pointer' }}>
 							{file ? file.name : "Select Image"}
@@ -296,6 +342,7 @@ const Profile = () => {
 					</div>
 				)}
 			</section>
+
 			{/* SECTION 2: BIOGRAPHY & DETAILS */}
 			<section className="settings-section">
 				<h2>The Narrative</h2>
@@ -339,6 +386,19 @@ const Profile = () => {
 								placeholder="vegan, art, coffee..."
 							/>
 						</div>
+						<div className="input-group">
+							<label>Birth Date (Verified)</label>
+							<input 
+								type="date" 
+								value={formData.birthdate} 
+								readOnly 
+								disabled
+								style={{ opacity: 0.5, cursor: 'not-allowed' }}
+							/>
+							<p style={{ fontSize: '0.6rem', color: 'var(--text-muted)', marginTop: '5px' }}>
+								Age cannot be changed after registration.
+							</p>
+						</div>
 					</div>
 					<button type="submit" className="btn" style={{ marginTop: '40px' }}>Save Narrative</button>
 				</form>
@@ -348,8 +408,8 @@ const Profile = () => {
 			<section className="settings-section">
 				<h2>Presence & Location</h2>
 				<p style={{ marginBottom: '20px', fontSize: '0.9rem', color: 'var(--text-muted)', fontFamily: 'var(--font-accent)', textTransform: 'uppercase' }}>
-					Current Base: {profile.city || "Unknown City"} 
-					<span style={{ marginLeft: '10px', opacity: 0.5 }}>({profile.latitude?.toFixed(2)}, {profile.longitude?.toFixed(2)})</span>
+					Current Base: {profile?.city || "Unknown City"} 
+					<span style={{ marginLeft: '10px', opacity: 0.5 }}>({profile?.latitude?.toFixed(2)}, {profile?.longitude?.toFixed(2)})</span>
 				</p>
 				<div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap' }}>
 					<button onClick={handleLocateMe} className="btn" style={{ background: 'var(--matcha)', border: 'none' }}>Locate Me (GPS)</button>
@@ -388,7 +448,7 @@ const Profile = () => {
 				</form>
 			</section>
 
-        	{/* SECTION 5: HISTORY */}
+			{/* SECTION 5: HISTORY */}
 			<section className="settings-section" >
 				<h2>History & Connections</h2>
 				<div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '60px' }}>
@@ -403,25 +463,20 @@ const Profile = () => {
 				</div>
 			</section>
 
-			{/* SECTION 7: LOGOUT AND DELETE ACCOUNT */}
+			{/* SECTION 6: DANGER ZONE */}
 			<section className="settings-section" style={{ borderTop: '1px solid #ff4444', marginTop: '50px' }}>
 				<h2 style={{ color: '#ff4444' }}>Danger Zone</h2>
 				<p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '20px' }}>
 					Once you delete your account, there is no going back. Please be certain.
 				</p>
-				<div style={{ display: 'flex', justifyContent: 'center', padding: '40px 0' }}>
+				<div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '20px', padding: '20px 0' }}>
 					<button 
 						onClick={logout} 
 						className="btn btn-logout"
-						style={{ 
-							width: '100%',
-							maxWidth: '280px'
-						}}
+						style={{ width: '100%', maxWidth: '280px' }}
 					>
 						Logout from Matcha
 					</button>
-				</div>
-				<div style={{ display: 'flex', justifyContent: 'center' }}>
 					<button 
 						onClick={handleDeleteAccount} 
 						className="btn" 

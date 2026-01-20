@@ -165,7 +165,7 @@ nav .dropdown-link img {
 .btn {
   display: inline-block;
   padding: 15px 20px;
-  background-color: #a18fb9;
+  background-color: #1c1a1e;
   color: var(--bg-body);
   font-family: var(--font-accent);
   font-size: 0.7rem;
@@ -174,7 +174,7 @@ nav .dropdown-link img {
   text-decoration: none;
   border-radius: var(--radius);
   border: 1px solid var(--text-main);
-  border-color: #807293;
+  border-color: #28193d;
   cursor: pointer;
   transition: all 0.3s ease;
   text-align: center;

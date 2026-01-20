@@ -101,7 +101,7 @@ const Navbar = () => {
 							
 							{notifications.length === 0 ? (
 								<p style={{padding: '30px', textAlign: 'center', fontFamily: 'var(--font-heading)', fontStyle: 'italic'}}>
-									Aucune nouvelle notification.
+									Nothing going on here.
 								</p>
 							) : (
 								<div style={{display: 'flex', flexDirection: 'column'}}>

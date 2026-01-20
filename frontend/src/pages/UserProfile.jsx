@@ -20,6 +20,28 @@ const UserProfile = () => {
 		return `http://localhost:3000${path}`;
 	};
 
+	const DefaultAvatar = ({ name }) => (
+		<div style={{
+			width: '100%',
+			aspectRatio: '3/4',
+			backgroundColor: 'var(--accent)',
+			display: 'flex',
+			alignItems: 'center',
+			justifyContent: 'center',
+			borderRadius: 'var(--radius)',
+			border: '1px solid var(--text-main)'
+		}}>
+			<span style={{ 
+				fontFamily: 'var(--font-heading)', 
+				fontSize: '5rem', 
+				color: 'var(--matcha)',
+				fontStyle: 'italic'
+			}}>
+				{name ? name.charAt(0).toUpperCase() : 'M'}
+			</span>
+		</div>
+	);
+
 	const fetchUser = useCallback(async () => {
 		try {
 			const res = await axios.get(`/api/browsing/user/${id}`);
@@ -44,10 +66,10 @@ const UserProfile = () => {
 			} else {
 				await axios.post("/api/interactions/like", { target_id: user.id });
 				setUser({ ...user, is_liked: true, fame_rating: user.fame_rating + 5 });
-				toast.success("Liked! 💖");
+				toast.success("Liked!");
 			}
 		} catch (error) {
-			toast.error("Action failed");
+			toast.error("Action failed: You must add profile picture first");
 		}
 	};
 
@@ -81,11 +103,16 @@ const UserProfile = () => {
 		return <div className="container center">Loading profile...</div>;
 
 	const profilePic = user.images.find(img => img.is_profile_pic)?.file_path;
+
 	return (
 		<div className="container" style={{ padding: '60px 20px' }}>
 			<div className="profile-layout">
 				<div>
-					<img src={getImageUrl(profilePic)} alt={user.first_name} className="profile-image-main" />
+					{profilePic ? (
+						<img src={getImageUrl(profilePic)} alt={user.first_name} className="profile-image-main" />
+					) : (
+						<DefaultAvatar name={user.first_name} />
+					)}
 					<div className="profile-gallery">
 						{user.images.map(img => (
 							<img key={img.id} src={getImageUrl(img.file_path)} className="gallery-thumb" alt="Gallery" />
@@ -110,6 +137,11 @@ const UserProfile = () => {
 						{user.is_online ? "Currently Online" : `Last seen ${user.last_seen || "recently"}`}
 						<br /><br />
 						{user.age} Years Old — Based in {user.city}
+
+					<div style={{ marginTop: '10px', fontSize: '0.65rem', letterSpacing: '0.1em', opacity: 0.8 }}>
+						POPULARITY INDEX: <span style={{ color: 'var(--matcha)', fontWeight: 'bold' }}>{user.fame_rating} PTS</span>
+					</div>
+
 					</div>
 					<div className="profile-section">
 						<h3>About</h3>
@@ -134,7 +166,7 @@ const UserProfile = () => {
 											color: user.is_liked ? 'var(--text-main)' : 'var(--bg-body)' 
 										}}
 									>
-										{user.is_liked ? "Unmatch" : "Match with her/him"}
+										{user.is_liked ? "Waiting for a Match.." : "Connect"}
 									</button>
 									{user.is_match && (
 										<Link to="/chat" className="btn" style={{ flex: 1 }}>Send Message</Link>
