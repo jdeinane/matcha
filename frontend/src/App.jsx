@@ -18,6 +18,8 @@ import UserProfile from "./pages/UserProfile";
 import Chat from "./pages/Chat";
 import Search from './pages/Search';
 import Home from './pages/Home';
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 
 const Navbar = () => {
 	const socket = useSocket();
@@ -181,7 +183,8 @@ function App() {
 						<Route path="/login" element={<Login />} />
 						<Route path="/register" element={<Register />} />
 						<Route path="/verify/:token" element={<VerifyEmail />} />
-
+						<Route path="/forgot-password" element={<ForgotPassword />} />
+						<Route path="/reset-password/:token" element={<ResetPassword />} />
 						
 						<Route element={<ProtectedRoute />}>
 							

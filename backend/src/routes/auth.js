@@ -39,8 +39,8 @@ router.post("/register", async (req, res) => {
 
 		// 5. Insertion en BDD
 		const insertUser = db.prepare(`
-			INSERT INTO users (username, email, first_name, last_name, password_hash, verify_token)
-			VALUES (?, ?, ?, ?, ?, ?)
+			INSERT INTO users (username, email, first_name, last_name, password_hash, verify_token, verify_token_expires_at)
+			VALUES (?, ?, ?, ?, ?, ?, datetime('now', '+24 hours'))
 		`);
 
 		insertUser.run(
@@ -77,13 +77,22 @@ router.post("/verify-email", (req, res) => {
 		return res.status(400).json({ error: "Missing token" });
 	}
 
-	const user = db.prepare("SELECT id FROM users WHERE verify_token = ?").get(token);
+	const user = db.prepare(`
+		SELECT id FROM users 
+		WHERE verify_token = ? 
+		AND (verify_token_expires_at > datetime('now') OR verify_token_expires_at IS NULL)
+	`).get(token);
+
 	if (!user) {
 		return res.status(400).json({ error: "Invalid or expired token." });
 	}
 
 	// Met a jour l'utilisateur
-	db.prepare("UPDATE users SET is_verified = 1, verify_token = NULL WHERE id = ?").run(user.id);
+	db.prepare(`
+		UPDATE users 
+		SET is_verified = 1, verify_token = NULL, verify_token_expires_at = NULL 
+		WHERE id = ?
+	`).run(user.id);
 
 	res.json({ message: "Account verified successfully!" });
 })

@@ -27,7 +27,7 @@ try {
     console.log('   (IDs > 500 is coherent with the manuals registrations)');
 
     const recentUsers = db.prepare(`
-        SELECT id, username, email, is_verified, created_at 
+        SELECT id, username, email, password_hash, is_verified, created_at
         FROM users 
         ORDER BY id DESC 
         LIMIT 10

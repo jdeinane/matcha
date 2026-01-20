@@ -24,7 +24,8 @@ const Login = () => {
 	return (
 		<div className="container" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
 			<div className="card" style={{ width: '100%', maxWidth: '400px' }}>
-				<h1 className="center" style={{ marginBottom: '2rem' }}>🍵 Matcha</h1>
+				<h1 className="center" style={{ marginBottom: '2rem', color: 'var(--matcha)' }}>Matcha</h1>
+				
 				<h2 className="center" style={{ marginBottom: '1.5rem', fontSize: '1.2rem' }}>Login</h2>
 				
 				<form onSubmit={handleSubmit(onSubmit)} className="flex-col">
@@ -49,9 +50,22 @@ const Login = () => {
 					<button type="submit" className="btn">Login</button>
 				</form>
 
-				<p className="center" style={{ marginTop: '1.5rem' }}>
-					Not registered yet? <Link to="/register" className="link">Register</Link>
-				</p>
+				<div className="center" style={{ marginTop: '1.5rem', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+					<p style={{ margin: 0 }}>
+						Not registered yet? <Link to="/register" className="link">Register</Link>
+					</p>
+					
+					<Link to="/forgot-password" style={{ 
+						fontFamily: 'var(--font-accent)', 
+						fontSize: '0.6rem', 
+						textTransform: 'uppercase', 
+						color: 'var(--text-muted)', 
+						textDecoration: 'none',
+						letterSpacing: '0.1em'
+					}}>
+						Forgot password?
+					</Link>
+				</div>
 			</div>
 		</div>
 	);

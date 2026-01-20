@@ -411,28 +411,24 @@ const Profile = () => {
 				</div>
 			</section>
 
-			{/* SECTION 6: LOGOUT */}
-			<section className="settings-section" style={{ marginTop: '100px' }}>
+			{/* SECTION 7: LOGOUT AND DELETE ACCOUNT */}
+			<section className="settings-section" style={{ borderTop: '1px solid #ff4444', marginTop: '50px' }}>
+				<h2 style={{ color: '#ff4444' }}>Danger Zone</h2>
+				<p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '20px' }}>
+					Once you delete your account, there is no going back. Please be certain.
+				</p>
 				<div style={{ display: 'flex', justifyContent: 'center', padding: '40px 0' }}>
 					<button 
 						onClick={logout} 
 						className="btn btn-logout"
 						style={{ 
 							width: '100%',
-							maxWidth: '300px'
+							maxWidth: '280px'
 						}}
 					>
 						Logout from Matcha
 					</button>
 				</div>
-			</section>
-
-			{/* SECTION 7: DELETE ACCOUNT */}
-			<section className="settings-section" style={{ borderTop: '1px solid #ff4444', marginTop: '50px' }}>
-				<h2 style={{ color: '#ff4444' }}>Danger Zone</h2>
-				<p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '20px' }}>
-					Once you delete your account, there is no going back. Please be certain.
-				</p>
 				<div style={{ display: 'flex', justifyContent: 'center' }}>
 					<button 
 						onClick={handleDeleteAccount} 
@@ -442,7 +438,7 @@ const Profile = () => {
 							color: 'white', 
 							border: 'none',
 							width: '100%',
-							maxWidth: '300px'
+							maxWidth: '280px'
 						}}
 					>
 						Delete My Account
