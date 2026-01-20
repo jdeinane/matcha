@@ -43,14 +43,28 @@ const GlobalNotifications = () => {
 	const socket = useSocket();
 	useEffect(() => {
 		if (!socket) return;
+
 		const handleNotification = (data) => {
 			if (data.type === 'match') toast.success(`💖 ${data.message}`);
+			if (window.location.pathname === '/chat') return;
 			else if (data.type === 'like') toast.info(`👍 ${data.message}`);
-			else if (data.type === 'message') toast.info(`💬 New message from ${data.sender_name}`);
-			else toast.info(data.message);
+			else if (data.type !== 'message') toast.info(data.message);
 		};
+
+		const handleNewMessage = (msg) => {
+			console.log("Message reçu pour Toast:", msg);
+			if (window.location.pathname !== '/chat') {
+				toast.info(`💬 New message from ${msg.sender_name || 'someone'}`);
+			}
+		};
+
 		socket.on("notification", handleNotification);
-		return () => socket.off("notification", handleNotification);
+		socket.on("message", handleNewMessage);
+
+		return () => {
+			socket.off("notification", handleIncomingData);
+			socket.off("message", handleNewMessage);
+		};
 	}, [socket]);
 	return null;
 };

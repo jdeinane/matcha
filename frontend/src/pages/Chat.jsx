@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { Link } from "react-router-dom";
 import axios from "axios";
 import { toast } from "react-toastify";
 
@@ -58,6 +59,13 @@ const Chat = () => {
 			setSelectedUser(user);
 			const res = await axios.get(`/api/chat/messages/${user.id}`);
 			setMessages(res.data);
+
+			setConversations(prev => prev.map(c => 
+			c.id === user.id ? { ...c, unreadCount: 0 } : c
+		));
+			if (socket) {
+				socket.emit("messages_read"); 
+			}
 			setTimeout(() => scrollRef.current?.scrollIntoView(), 100);
 		} catch (err) {
 			toast.error("Error loading chat");
@@ -73,7 +81,7 @@ const Chat = () => {
 			
 			setMessages([...messages, res.data]);
 			setNewMessage("");
-			fetchConversations(); // Update sidebar preview
+			fetchConversations();
 
 		} catch (err) {
 			toast.error("Message send failed");
@@ -83,36 +91,58 @@ const Chat = () => {
 	return (
 		<div className="container">
 			<div className="chat-wrapper">
-				{/* SIDEBAR */}
 				<div className="chat-sidebar">
 					<h3>Matches</h3>
 					{conversations.length === 0 && <p style={{padding: '25px', color: 'var(--text-muted)', fontStyle: 'italic'}}>No correspondents yet.</p>}
 					{conversations.map(conv => (
-						<div 
-							key={conv.id}
-							onClick={() => fetchMessages(conv)}
-							className={`conv-item ${selectedUser?.id === conv.id ? 'active' : ''}`}
-						>
-							<img 
-								src={conv.profile_pic ? `http://localhost:3000${conv.profile_pic}` : "https://via.placeholder.com/40"} 
-								alt={conv.first_name}
-							/>
-							<div style={{overflow: 'hidden', flex: 1}}>
-								<div style={{fontFamily: 'var(--font-heading)', fontSize: '1.1rem'}}>{conv.first_name}</div>
-								<div style={{fontSize: '0.7rem', color: 'var(--text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', textTransform: 'uppercase', letterSpacing: '0.05em'}}>
-									{conv.lastMessage ? conv.lastMessage.content : "New Match"}
-								</div>
+					<div 
+						key={conv.id}
+						onClick={() => fetchMessages(conv)}
+						className={`conv-item ${selectedUser?.id === conv.id ? 'active' : ''}`}
+						style={{ position: 'relative' }}
+					>
+						<img 
+							src={conv.profile_pic ? `http://localhost:3000${conv.profile_pic}` : "https://via.placeholder.com/40"} 
+							alt={conv.first_name}
+						/>
+						<div style={{overflow: 'hidden', flex: 1}}>
+							<div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+								<span style={{fontFamily: 'var(--font-heading)', fontSize: '1.1rem'}}>{conv.first_name}</span>
+								{conv.unreadCount > 0 && selectedUser?.id !== conv.id && (
+									<span style={{ 
+										backgroundColor: 'var(--matcha)', 
+										color: 'white', 
+										fontSize: '0.6rem', 
+										padding: '2px 7px', 
+										borderRadius: '50%' 
+									}}>{conv.unreadCount}</span>
+								)}
+							</div>
+							<div style={{fontSize: '0.7rem', color: 'var(--text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', textTransform: 'uppercase', letterSpacing: '0.05em'}}>
+								{conv.lastMessage ? conv.lastMessage.content : "New Match"}
 							</div>
 						</div>
-					))}
+					</div>
+				))}
 				</div>
 
 				{/* MAIN WINDOW */}
 				<div className="chat-main">
 					{selectedUser ? (
 						<>
-							<div className="chat-header">
-								Conversation with {selectedUser.first_name}
+							<div className="chat-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+								<span>Conversation with {selectedUser.first_name}</span>
+								<Link to={`/user/${selectedUser.id}`} style={{ 
+									fontSize: '0.7rem', 
+									fontFamily: 'var(--font-accent)', 
+									textTransform: 'uppercase', 
+									color: 'var(--text-muted)',
+									textDecoration: 'none',
+									border: '1px solid var(--text-muted)',
+									padding: '5px 10px'
+								}}>
+									View Profile
+								</Link>
 							</div>
 
 							<div className="messages-container">

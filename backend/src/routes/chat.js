@@ -31,7 +31,13 @@ router.get("/conversations", (req, res) => {
 				ORDER BY created_at DESC LIMIT 1
 			`).get(userId, match.id, match.id, userId);
 
-			return { ...match, lastMessage: lastMsg || null };
+			// Compte les messages non lus
+			const unread = db.prepare(`
+				SELECT COUNT(*) as count FROM messages 
+				WHERE sender_id = ? AND receiver_id = ? AND is_read = 0
+			`).get(match.id, userId);
+
+			return { ...match, lastMessage: lastMsg || null, unreadCount: unread.count };
 		});
 
 		res.json(conversations);
@@ -40,6 +46,14 @@ router.get("/conversations", (req, res) => {
 		console.error(error);
 		res.status(500).json({ error: "Server error" });
 	}
+});
+
+/* TO COUNT CHAT NOTIFS TO RENDER IN THE NAVBAR */
+router.get("/unread-total", (req, res) => {
+	const unread = db.prepare(`
+		SELECT COUNT(*) as count FROM messages WHERE receiver_id = ? AND is_read = 0
+	`).get(req.user.id);
+    res.json({ total: unread.count });
 });
 
 /* GET MESSAGES (History) */
@@ -106,19 +120,15 @@ router.post("/messages/:id", (req, res) => {
 		const newMessage = {
 			id: info.lastInsertRowid,
 			sender_id: senderId,
+			sender_name: req.user.username,
 			receiver_id: recipient_id,
 			content: content,
+			type: 'message',
 			created_at: new Date().toISOString(),
 			is_read: 0
 		};
 
 		notifyUser(recipient_id, "message", newMessage);
-		
-		db.prepare("INSERT INTO notifications (recipient_id, sender_id, type) VALUES (?, ?, 'message')").run(recipient_id, senderId);
-		notifyUser(recipient_id, "notification", {
-			type: "message",
-			sender_name: req.user.username
-		});
 
 		res.status(201).json(newMessage);
 

@@ -59,6 +59,10 @@ export const initSocket = (httpServer) => {
 
 		io.emit("userStatus", { userId, status: "online" });
 
+		socket.on("messages_read", () => {
+			socket.emit("messages_read");
+		});
+
 		socket.on("disconnect", () => {
 			console.log(`❌ User ${userId} disconnected`);
 			onlineUsers.delete(userId);

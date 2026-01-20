@@ -11,6 +11,7 @@ const Navbar = () => {
 	const { user, logout } = useAuth();
 
 	const [unreadCount, setUnreadCount] = useState(0);
+	const [unreadChatCount, setUnreadChatCount] = useState(0);
 	const [showDropdown, setShowDropdown] = useState(false);
 	const [notifications, setNotifications] = useState([]);
 
@@ -31,6 +32,42 @@ const Navbar = () => {
 			.then(res => setUnreadCount(res.data.unreadCount))
 			.catch(() => {});
 	}, [location.pathname, user]);
+
+	useEffect(() => {
+		if (!user) return;
+		
+		const fetchUnread = () => {
+			axios.get("/api/chat/unread-total").then(res => setUnreadChatCount(res.data.total));
+		};
+
+		fetchUnread();
+
+		if (location.pathname === '/chat') {
+			setUnreadChatCount(0);
+		}
+	}, [location.pathname, user]);
+
+	useEffect(() => {
+		if (!socket) return;
+
+		const handleReadUpdate = () => {
+			axios.get("/api/chat/unread-total").then(res => setUnreadChatCount(res.data.total));
+		};
+
+		const handleNewMsg = () => {
+			if (location.pathname !== '/chat') {
+				setUnreadChatCount(prev => prev + 1);
+			}
+		};
+
+		socket.on("message", handleNewMsg);
+		socket.on("messages_read", handleReadUpdate);
+
+		return () => {
+			socket.off("message", handleNewMsg);
+			socket.off("messages_read", handleReadUpdate);
+		};
+	}, [socket, location.pathname]);
 
 	useEffect(() => {
 		if (!socket) return;
@@ -55,23 +92,6 @@ const Navbar = () => {
 
 	if (!user) return null;
 
-	const navItemStyle = {
-		cursor: 'pointer',
-		fontFamily: 'var(--font-accent)',
-		fontSize: '0.75rem',
-		textTransform: 'uppercase',
-		letterSpacing: '0.15em',
-		color: '#F5F5DC', 
-		display: 'flex',
-		alignItems: 'center',
-		textDecoration: 'none',
-		background: 'none',
-		border: 'none',
-		padding: '5px 0',
-		transition: 'opacity 0.2s ease',
-		lineHeight: '1'
-	};
-
 	const iconOnlyStyle = {
 		cursor: 'pointer',
 		color: '#F5F5DC', 
@@ -94,8 +114,21 @@ const Navbar = () => {
 			<div style={{ display: 'flex', alignItems: 'center' }}>
 				<Link to="/search" className="nav-link">Search</Link>
 				<Link to="/browse" className="nav-link">Discover</Link>
-				<Link to="/chat" className="nav-link">Chat</Link>
 				<Link to={`/user/${user.id}`} className="nav-link">Profile</Link>
+				<Link to="/chat" className="nav-link" style={{ display: 'flex', alignItems: 'center' }}>
+				Chat
+				{unreadChatCount > 0 && (
+					<span style={{ 
+						marginLeft: '5px', 
+						backgroundColor: '#F5F5DC',
+						color: 'var(--matcha)', 
+						fontSize: '0.6rem',
+						padding: '2px 6px',
+						borderRadius: '10px',
+						fontWeight: 'bold'
+					}}>{unreadChatCount}</span>
+				)}
+			</Link>
 
 				<div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
 					<button 
