@@ -541,3 +541,45 @@ input:focus {
     transform: translateY(-2px);
     box-shadow: 0 5px 15px rgba(255, 68, 68, 0.2);
 }
+
+/* --- PERSONNALISATION REACT-TOASTIFY --- */
+
+.Toastify__toast {
+    border-radius: var(--radius);
+    font-family: var(--font-body);
+    font-size: 1.3rem;
+    border: 1px solid var(--text-main);
+    box-shadow: var(--shadow);
+}
+
+.Toastify__toast--success {
+    background: var(--matcha) !important;
+    color: var(--bg-body) !important;
+}
+
+.Toastify__toast--error {
+    background: #ff4444 !important;
+    color: var(--white) !important;
+}
+
+.Toastify__toast--info {
+    background: var(--bg-card) !important;
+    color: var(--text-main) !important;
+}
+
+.Toastify__close-button {
+    color: inherit;
+    opacity: 0.7;
+}
+
+.Toastify__toast-icon {
+    width: 20px;
+}
+
+.Toastify__progress-bar--success {
+    background: var(--bg-body) !important;
+}
+
+.Toastify__progress-bar--error {
+    background: var(--white) !important;
+}
