@@ -185,6 +185,15 @@ router.get("/user/:id", (req, res) => {
 	try {
 		const targetId = parseInt(req.params.id);
 		const visitorId = req.user.id;
+		const blockCheck = db.prepare(`
+			SELECT 1 FROM blocks 
+			WHERE (blocker_id = ? AND blocked_id = ?) 
+			OR (blocker_id = ? AND blocked_id = ?)
+		`).get(visitorId, targetId, targetId, visitorId);
+
+		if (blockCheck) {
+			return res.status(403).json({ error: "User not found or blocked" });
+		}
 
 		// 1. Recuperer le user
 		const user = db.prepare(`

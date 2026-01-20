@@ -123,6 +123,41 @@ router.post("/block", (req, res) => {
 	}
 });
 
+/* GET BLOCKED USERS: List of blocked users */
+router.get("/blocks", (req, res) => {
+	try {
+		const userId = req.user.id;
+		const blockedUsers = db.prepare(`
+			SELECT u.id, u.username, u.first_name, i.file_path as profile_pic
+			FROM users u
+			JOIN blocks b ON u.id = b.blocked_id
+			LEFT JOIN images i ON u.id = i.user_id AND i.is_profile_pic = 1
+			WHERE b.blocker_id = ?
+		`).all(userId);
+
+		res.json(blockedUsers);
+	} catch (error) {
+		console.error(error);
+		res.status(500).json({ error: "Server error" });
+	}
+});
+
+/* POST UNBLOCKED: Unblock user */
+router.post("/unblock", (req, res) => {
+	try {
+		const { target_id } = req.body;
+		const blockerId = req.user.id;
+
+		db.prepare("DELETE FROM blocks WHERE blocker_id = ? AND blocked_id = ?")
+			.run(blockerId, target_id);
+
+		res.json({ success: true, message: "User unblocked" });
+	} catch (error) {
+		console.error(error);
+		res.status(500).json({ error: "Server error" });
+	}
+});
+
 /* POST REPORT: Report user */
 router.post("/report", (req, res) => {
 	try {

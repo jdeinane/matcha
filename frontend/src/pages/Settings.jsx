@@ -9,6 +9,7 @@ const Profile = () => {
 	const [loading, setLoading] = useState(true);
 	const [manualCity, setManualCity] = useState("");
 	const [history, setHistory] = useState({ visits: [], likes: [] });
+	const [blockedUsers, setBlockedUsers] = useState([]);
 	const { logout } = useAuth();
 
 	// Etats pour les formulaires
@@ -22,6 +23,7 @@ const Profile = () => {
 	// Charger les donnees au montage
 	useEffect(() => {
 		fetchProfile();
+		fetchBlockedUsers();
 	}, []);
 
 	const fetchProfile = async () => {
@@ -52,6 +54,25 @@ const Profile = () => {
 		} catch (error) {
 			toast.error("Error fetching profile");
 			setLoading(false);
+		}
+	};
+
+	const fetchBlockedUsers = async () => {
+		try {
+			const res = await axios.get("/api/interactions/blocks");
+			setBlockedUsers(res.data);
+		} catch (err) {
+			console.error("Failed to fetch blocked users");
+		}
+	};
+
+	const handleUnblock = async (targetId) => {
+		try {
+			await axios.post("/api/interactions/unblock", { target_id: targetId });
+			toast.success("User unblocked");
+			setBlockedUsers(prev => prev.filter(u => u.id !== targetId));
+		} catch (err) {
+			toast.error("Failed to unblock");
 		}
 	};
 
@@ -462,6 +483,50 @@ const Profile = () => {
 					</div>
 				</div>
 			</section>
+
+			<div className="settings-section" style={{ marginTop: '60px' }}>
+				<h2>Blocked Profiles</h2>
+				{blockedUsers.length === 0 ? (
+					<p style={{ fontStyle: 'italic', color: 'var(--text-muted)' }}>No blocked users.</p>
+				) : (
+					<div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+						{blockedUsers.map(u => (
+							<div key={u.id} style={{ 
+								display: 'flex', 
+								alignItems: 'center', 
+								justifyContent: 'space-between',
+								padding: '15px',
+								border: '1px solid rgba(0,0,0,0.1)',
+								borderRadius: 'var(--radius)'
+							}}>
+								<div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+									<img 
+										src={u.profile_pic ? `http://localhost:3000${u.profile_pic}` : "https://via.placeholder.com/40"} 
+										alt={u.first_name}
+										style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }}
+									/>
+									<span style={{ fontFamily: 'var(--font-accent)', fontSize: '0.8rem' }}>
+										{u.first_name} (@{u.username})
+									</span>
+								</div>
+								<button 
+									onClick={() => handleUnblock(u.id)}
+									className="btn"
+									style={{ 
+										padding: '8px 15px', 
+										fontSize: '0.6rem', 
+										backgroundColor: 'transparent', 
+										color: 'var(--text-main)',
+										borderColor: 'var(--text-main)'
+									}}
+								>
+									Unblock
+								</button>
+							</div>
+						))}
+					</div>
+				)}
+			</div>
 
 			{/* SECTION 6: DANGER ZONE */}
 			<section className="settings-section" style={{ borderTop: '1px solid #ff4444', marginTop: '50px' }}>
