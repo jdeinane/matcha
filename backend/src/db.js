@@ -32,7 +32,7 @@ const schema = `
 		biography TEXT,
 		fame_rating REAL DEFAULT 0,
 	
-		-- LOCALIZATION
+		-- LOCATION
 		latitude REAL CHECK(latitude >= -90 AND latitude <= 90),
 		longitude REAL CHECK(longitude >= -180 AND longitude <= 180),
 		city TEXT,

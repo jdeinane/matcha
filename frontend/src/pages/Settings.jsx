@@ -204,12 +204,30 @@ const Profile = () => {
 		navigator.geolocation.getCurrentPosition(
 			async (position) => {
 				try {
+					const { latitude, longitude } = position.coords;
+					let detectedCity = "";
+
+					try {
+						const geoRes = await axios.get(
+							`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`
+						);
+						if (geoRes.data && geoRes.data.address) {
+							const address = geoRes.data.address;
+							detectedCity = address.city || address.town || address.village || address.municipality || "";
+						}
+					} catch (geoError) {
+						console.warn("Could not retrieve city name from coordinates", geoError);
+					}
+
 					await axios.put("/api/users/location", {
-						latitude: position.coords.latitude,
-						longitude: position.coords.longitude
+						latitude,
+						longitude,
+						city: detectedCity
 					});
-					toast.success("Location updated!");
+
+					toast.success(detectedCity ? `Location updated: ${detectedCity}` : "Location updated!");
 					fetchProfile();
+
 				} catch (error) {
 					console.error("Backend error:", error);
 					toast.error("Error saving location");
@@ -254,10 +272,10 @@ const Profile = () => {
 	};
 
 	const UserList = ({ users, emptyMsg }) => {
-	if (!users || users.length === 0)
-		return <p style={{color: '#888', fontStyle: 'italic'}}>{emptyMsg}</p>;
+		if (!users || users.length === 0)
+			return <p style={{color: '#888', fontStyle: 'italic'}}>{emptyMsg}</p>;
 
-	return (
+		return (
 			<div style={{display: 'flex', gap: '15px', overflowX: 'auto', paddingBottom: '10px'}}>
 				{users.map((u, i) => (
 					<Link key={i} to={`/user/${u.id}`} style={{textDecoration: 'none', color: 'inherit', minWidth: '80px', textAlign: 'center'}}>
