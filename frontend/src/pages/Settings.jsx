@@ -215,6 +215,23 @@ const Profile = () => {
 		);
 	};
 
+	/* DELETE ACCOUNT */
+	const handleDeleteAccount = async () => {
+		const confirm = window.confirm(
+			"ARE YOU SURE? This action is irreversible. All your matches and photos will be lost forever."
+		);
+		
+		if (confirm) {
+			try {
+				await axios.delete("/api/users/account");
+				toast.success("Account deleted. Farewell.");
+				logout();
+			} catch (error) {
+				toast.error("Failed to delete account");
+			}
+		}
+	};
+
 	const UserList = ({ users, emptyMsg }) => {
 	if (!users || users.length === 0)
 		return <p style={{color: '#888', fontStyle: 'italic'}}>{emptyMsg}</p>;
@@ -379,7 +396,7 @@ const Profile = () => {
 				</form>
 			</section>
 
-        {/* SECTION 5: HISTORY */}
+        	{/* SECTION 5: HISTORY */}
 			<section className="settings-section" >
 				<h2>History & Connections</h2>
 				<div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '60px' }}>
@@ -406,6 +423,29 @@ const Profile = () => {
 						}}
 					>
 						Logout from Matcha
+					</button>
+				</div>
+			</section>
+
+			{/* SECTION 7: DELETE ACCOUNT */}
+			<section className="settings-section" style={{ borderTop: '1px solid #ff4444', marginTop: '50px' }}>
+				<h2 style={{ color: '#ff4444' }}>Danger Zone</h2>
+				<p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '20px' }}>
+					Once you delete your account, there is no going back. Please be certain.
+				</p>
+				<div style={{ display: 'flex', justifyContent: 'center' }}>
+					<button 
+						onClick={handleDeleteAccount} 
+						className="btn" 
+						style={{ 
+							background: '#ff4444', 
+							color: 'white', 
+							border: 'none',
+							width: '100%',
+							maxWidth: '300px'
+						}}
+					>
+						Delete My Account
 					</button>
 				</div>
 			</section>

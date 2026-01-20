@@ -297,4 +297,24 @@ router.get("/visits", (req, res) => {
 	}
 });
 
+router.delete("/account", verifyToken, async(req, res) => {
+	const userId = req.user.id;
+
+	try {
+		// 1. Recuperer les photos pour les supprimer du disque si nescessaire
+		const images = db.prepare("SELECT file_path FROM images WHERE user_id = ?").all(userId);
+
+		// 2. Supprimer les donnees en cascade
+		db.prepare("DELETE FROM users WHERE id = ?").run(userId);
+
+		// 3. Detruire le cookie de session/token
+		res.clearCookie("token");
+		res.json({ message: "Account deleted successfully"});
+
+	} catch (error) {
+		console.error(error);
+		res.status(500).json({ error: "Failed to delete account" });
+	}
+});
+
 export default router;

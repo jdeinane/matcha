@@ -23,7 +23,7 @@ export function createApp() {
 	const origin = process.env.CORS_ORIGIN || "http://localhost:5173";
 	const limiter = rateLimit({
 		windowMs: 15 * 60 * 1000,
-		max: 100,
+		max: 1000,
 		message: "Too many requests from this IP, please try again later."
 	});
 
