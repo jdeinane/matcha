@@ -73,7 +73,6 @@ router.get("/suggestions", (req, res) => {
 
 		// 3. Recuperer les candidats potentiels
 		// On exclut soi-meme et les comptes non verifies
-		// TODO: filtrer les bloques 
 		const query = `
 			SELECT users.id, username, first_name, birthdate, gender, fame_rating, latitude, longitude, file_path as profile_pic
 			FROM users
@@ -81,6 +80,7 @@ router.get("/suggestions", (req, res) => {
 			WHERE users.id != ?
 			AND is_verified = 1
 			${genderCondition}
+			AND users.id IN (SELECT user_id FROM images WHERE is_profile_pic = 1)
 			AND users.id NOT IN (SELECT blocked_id FROM blocks WHERE blocker_id = ?)
 			AND users.id NOT IN (SELECT blocker_id FROM blocks WHERE blocked_id = ?)
 		`;
@@ -142,6 +142,7 @@ router.get("/search", (req, res) => {
 			LEFT JOIN images i ON u.id = i.user_id AND i.is_profile_pic = 1
 			WHERE u.id != ?
 			AND u.is_verified = 1
+			AND u.id IN (SELECT user_id FROM images WHERE is_profile_pic = 1)
 			AND u.id NOT IN (SELECT blocked_id FROM blocks WHERE blocker_id = ?)
 			AND u.id NOT IN (SELECT blocker_id FROM blocks WHERE blocked_id = ?)
 		`).all(currentUserId, currentUserId, currentUserId);

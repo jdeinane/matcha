@@ -1,10 +1,20 @@
 import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { registerSchema } from "../../../backend/src/schemas.js";
 import axios from "axios";
 
 const Register = () => {
-	const { register, handleSubmit, formState: { errors} } = useForm();
+	const {
+		register,
+		handleSubmit,
+		formState: { errors, isSubmitting }
+	 } = useForm({
+		resolver: zodResolver(registerSchema),
+		mode: "onChange"
+	 });
+	
 	const navigate = useNavigate();
 
 	const onSubmit = async (data) => {
@@ -30,20 +40,13 @@ const Register = () => {
 					
 					<div className="input-group">
 						<label>Username</label>
-						<input 
-							{...register("username", { required: "This field is required", minLength: { value: 3, message: "Min 3 characters" } })} 
-							placeholder="Ex: matcha_lover"
-						/>
+						<input {...register("username")} />
 						{errors.username && <p className="error-msg">{errors.username.message}</p>}
 					</div>
 
 					<div className="input-group">
 						<label>Email</label>
-						<input 
-							type="email"
-							{...register("email", { required: "Email required", pattern: { value: /^\S+@\S+$/i, message: "Invalid email" } })} 
-							placeholder="Ex: love@matcha.com"
-						/>
+						<input type="email" {...register("email")} placeholder="Ex: love@matcha.com" />
 						{errors.email && <p className="error-msg">{errors.email.message}</p>}
 					</div>
 
@@ -82,7 +85,9 @@ const Register = () => {
 						{errors.password && <p className="error-msg">{errors.password.message}</p>}
 					</div>
 
-					<button type="submit" className="btn">Register!</button>
+					<button type="submit" className="btn" disabled={isSubmitting}>
+						{isSubmitting ? "Processing..." : "Register!"}
+					</button>
 				</form>
 
 				<p className="center" style={{ marginTop: '1.5rem' }}>
