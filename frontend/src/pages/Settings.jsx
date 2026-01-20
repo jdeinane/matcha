@@ -291,7 +291,6 @@ const Profile = () => {
 				</p>
 			</header>
 
-			{/* INDICATEUR DE COMPLÉTION */}
 			{profile?.images?.length === 0 && (
 				<div style={{ 
 					background: 'var(--accent)', 

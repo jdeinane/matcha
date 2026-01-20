@@ -36,6 +36,16 @@ try {
     // Affichage propre en tableau
     console.table(recentUsers);
 
+    // 3. PREUVE QUE LE 'REPORT USER' FONCTIONNE
+    console.log('\x1b[33m%s\x1b[0m', '🚨 3. REPORTS');
+    const reports = db.prepare(`
+        SELECT *
+        FROM reports
+    `).all();
+
+    console.table(reports);
+
+
 } catch (error) {
     console.error("\x1b[31m%s\x1b[0m", "❌ Error: Unable to read the database.");
     console.error("   Check you are in the 'backend' folder or that 'matcha.db' exists.");

@@ -101,6 +101,7 @@ const schema = `
 	CREATE TABLE IF NOT EXISTS reports (
 		reported_id INTEGER NOT NULL,
 		reporter_id INTEGER NOT NULL,
+		reason TEXT,
 		created_at TEXT NOT NULL DEFAULT (datetime('now')),
 		PRIMARY KEY (reporter_id, reported_id),
 		FOREIGN KEY (reporter_id) REFERENCES users(id) ON DELETE CASCADE,

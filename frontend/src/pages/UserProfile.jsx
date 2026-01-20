@@ -198,31 +198,39 @@ const UserProfile = () => {
 					<h3>Interests</h3>
 					<div>{user.tags?.map(tag => <span key={tag} className="tag-pill">#{tag}</span>)}</div>
 				</div>
-				<div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-					<div style={{ display: 'flex', gap: '10px' }}>
-						<button 
-							onClick={handleLike} 
-							className="btn" 
-							style={{ 
-								flex: 1, 
-								background: user.is_liked ? 'transparent' : 'var(--text-main)', 
-								color: user.is_liked ? 'var(--text-main)' : 'var(--bg-body)' 
-							}}
-						>
-							{user.is_match ? "Unmatch" : user.is_liked ? "Waiting for a match.." : "Connect"}
-						</button>
+				<div style={{ marginTop: '40px' }}>
+					{isOwnProfile ? (
+						<Link to="/settings" className="btn" style={{ width: '30%', textAlign: 'center' }}>
+							Edit Profile
+						</Link>
+					) : (
+						<div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+							<div style={{ display: 'flex', gap: '10px' }}>
+								<button 
+									onClick={handleLike} 
+									className="btn" 
+									style={{ 
+										flex: 1, 
+										background: user.is_liked ? 'transparent' : 'var(--text-main)', 
+										color: user.is_liked ? 'var(--text-main)' : 'var(--bg-body)' 
+									}}
+								>
+									{user.is_match ? "Unmatch" : user.is_liked ? "Waiting for a match.." : "Connect"}
+								</button>
 
-						{user.is_match && (
-							<Link to="/chat" className="btn" style={{ flex: 1, background: 'var(--matcha)', color: 'white' }}>
-								Send Message
-							</Link>
-						)}
-					</div>
-					
-					<div style={{ display: 'flex', gap: '20px', marginTop: '10px', borderTop: '1px solid rgba(0,0,0,0.05)', paddingTop: '20px' }}>
-						<button onClick={handleReport} style={{ background: 'none', border: 'none', fontFamily: 'var(--font-accent)', fontSize: '0.6rem', cursor: 'pointer', textTransform: 'uppercase', color: 'var(--text-muted)' }}>Report Account</button>
-						<button onClick={handleBlock} style={{ background: 'none', border: 'none', fontFamily: 'var(--font-accent)', fontSize: '0.6rem', cursor: 'pointer', textTransform: 'uppercase', color: '#ff4444' }}>Block User</button>
-					</div>
+								{user.is_match && (
+									<Link to="/chat" className="btn" style={{ flex: 1, background: 'var(--matcha)', color: 'white' }}>
+										Send Message
+									</Link>
+								)}
+							</div>
+							
+							<div style={{ display: 'flex', gap: '20px', marginTop: '10px', borderTop: '1px solid rgba(0,0,0,0.05)', paddingTop: '20px' }}>
+								<button onClick={handleReport} style={{ background: 'none', border: 'none', fontFamily: 'var(--font-accent)', fontSize: '0.6rem', cursor: 'pointer', textTransform: 'uppercase', color: 'var(--text-muted)' }}>Report Account</button>
+								<button onClick={handleBlock} style={{ background: 'none', border: 'none', fontFamily: 'var(--font-accent)', fontSize: '0.6rem', cursor: 'pointer', textTransform: 'uppercase', color: '#ff4444' }}>Block User</button>
+							</div>
+						</div>
+					)}
 				</div>
 				{user.is_match && !isOwnProfile && (
 					<div style={{ marginTop: '30px', padding: '15px', border: '1px solid var(--matcha)', textAlign: 'center', fontFamily: 'var(--font-heading)', fontStyle: 'italic' }}>
