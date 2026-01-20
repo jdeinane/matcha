@@ -92,6 +92,20 @@ const Navbar = () => {
 
 	if (!user) return null;
 
+	const badgeStyle = {
+		marginLeft: '8px',
+		backgroundColor: '#F5F5DC',
+		color: 'var(--matcha)',
+		fontSize: '0.6rem',
+		padding: '2px 6px',
+		borderRadius: '10px',
+		fontWeight: 'bold',
+		display: 'inline-flex',
+		alignItems: 'center',
+		justifyContent: 'center',
+		minWidth: '16px'
+	};
+
 	const iconOnlyStyle = {
 		cursor: 'pointer',
 		color: '#F5F5DC', 
@@ -116,19 +130,11 @@ const Navbar = () => {
 				<Link to="/browse" className="nav-link">Discover</Link>
 				<Link to={`/user/${user.id}`} className="nav-link">Profile</Link>
 				<Link to="/chat" className="nav-link" style={{ display: 'flex', alignItems: 'center' }}>
-				Chat
-				{unreadChatCount > 0 && (
-					<span style={{ 
-						marginLeft: '5px', 
-						backgroundColor: '#F5F5DC',
-						color: 'var(--matcha)', 
-						fontSize: '0.6rem',
-						padding: '2px 6px',
-						borderRadius: '10px',
-						fontWeight: 'bold'
-					}}>{unreadChatCount}</span>
-				)}
-			</Link>
+					Chat
+					{unreadChatCount > 0 && (
+						<span style={badgeStyle}>{unreadChatCount}</span>
+					)}
+				</Link>
 
 				<div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
 					<button 
@@ -142,25 +148,10 @@ const Navbar = () => {
 							display: 'flex',
 							alignItems: 'center'
 						}}
-					>
+						>
 						Notifs
 						{unreadCount > 0 && (
-							<span style={{ 
-								backgroundColor: 'var(--matcha)', 
-								color: 'white',
-								marginLeft: '8px',
-								fontSize: '0.6rem',
-								minWidth: '18px',
-								height: '18px',
-								display: 'inline-flex',
-								alignItems: 'center',
-								justifyContent: 'center',
-								borderRadius: '50%',
-								fontWeight: 'bold',
-								border: '1px solid #F5F5DC'
-							}}>
-								{unreadCount}
-							</span>
+							<span style={badgeStyle}>{unreadCount}</span>
 						)}
 					</button>
 
