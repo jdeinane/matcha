@@ -123,6 +123,23 @@ router.post("/block", (req, res) => {
 		if (target_id === blockerId)
 			return res.status(400).json({ error: "Cannot block yourself" });
 
+		// On verifie s'il y avait des like avant le blocage (pour ajuster la fame)
+		const likeFromBlocker = db.prepare("SELECT id FROM likes WHERE liker_id = ? AND liked_id = ?").get(blockerId, target_id);
+		const likeFromTarget = db.prepare("SELECT id FROM likes WHERE liker_id = ? AND liked_id = ?").get(target_id, blockerId);
+
+		// Supprimer les likes
+		db.prepare("DELETE FROM likes WHERE liker_id = ? AND liked_id = ?").run(blockerId, target_id);
+		db.prepare("DELETE FROM likes WHERE liker_id = ? AND liked_id = ?").run(target_id, blockerId);
+
+		// Ajuste la popularite en fonction du block et si y'avait like
+		if (likeFromBlocker) {
+					db.prepare("UPDATE users SET fame_rating = MAX(0, fame_rating - 5) WHERE id = ?").run(target_id);
+				}
+
+		if (likeFromTarget) {
+					db.prepare("UPDATE users SET fame_rating = MAX(0, fame_rating - 5) WHERE id = ?").run(blockerId);
+				}
+				
 		// Inserer le blocage
 		db.prepare("INSERT OR IGNORE INTO blocks (blocker_id, blocked_id) VALUES (?, ?)").run(blockerId, target_id);
 

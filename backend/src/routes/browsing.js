@@ -238,7 +238,8 @@ router.get("/user/:id", (req, res) => {
 				if (!existingVisit && visitorId !== targetId) {
 					db.prepare("INSERT INTO visits (visitor_id, visited_id) VALUES (?, ?)").run(visitorId, targetId);
 					db.prepare("INSERT INTO notifications (recipient_id, sender_id, type) VALUES (?, ?, 'visit')").run(targetId, visitorId);
-				
+					db.prepare("UPDATE users SET fame_rating = fame_rating + 1 WHERE id = ?").run(targetId);
+					
 					// Socket
 					notifyUser(targetId, "notification", { type: "visit", sender_name: req.user.username, sender_id: visitorId });
 				}
