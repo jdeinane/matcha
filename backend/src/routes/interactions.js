@@ -43,6 +43,7 @@ router.post("/like", (req, res) => {
 
 		if (likedBack) {
 			// C'est un match -> creer une notif 'Match' pour les deux
+			db.prepare("UPDATE users SET fame_rating = fame_rating + 5 WHERE id = ?").run(target_id);
 			db.prepare("INSERT INTO notifications (recipient_id, sender_id, type) VALUES (?, ?, 'match')").run(target_id, liker_id);
 			db.prepare("INSERT INTO notifications (recipient_id, sender_id, type) VALUES (?, ?, 'match')").run(liker_id, target_id);
 			
@@ -139,7 +140,7 @@ router.post("/block", (req, res) => {
 		if (likeFromTarget) {
 					db.prepare("UPDATE users SET fame_rating = MAX(0, fame_rating - 5) WHERE id = ?").run(blockerId);
 				}
-				
+
 		// Inserer le blocage
 		db.prepare("INSERT OR IGNORE INTO blocks (blocker_id, blocked_id) VALUES (?, ?)").run(blockerId, target_id);
 
