@@ -155,13 +155,14 @@ router.get("/suggestions", (req, res) => {
 router.get("/search", (req, res) => {
 	try {
 		const { ageMin, ageMax, fameMin, fameMax, distanceMax, tags } = req.query;
+		const tagsInput = req.query.tags || req.query['tags[]'];
 		const currentUserId = req.user.id;
 		const me = db.prepare("SELECT latitude, longitude FROM users WHERE id = ?").get(currentUserId);
 
 		// On recupere tout le monde (sauf soi et bloques) et on filtre en JS
-		// Optimisation possible: ajouter des WHERE SQL pour fame/age si possible
 		const users = db.prepare(`
-			SELECT u.id, u.username, u.first_name, u.birthdate, u.fame_rating, u.latitude, u.longitude, i.file_path as profile_pic
+			SELECT u.id, u.username, u.first_name, u.birthdate, u.fame_rating, u.latitude, u.longitude, i.file_path as profile_pic,
+			(SELECT GROUP_CONCAT(t.name) FROM tags t JOIN user_tags ut ON ut.tag_id = t.id WHERE ut.user_id = u.id) as tags_string
 			FROM users u
 			LEFT JOIN images i ON u.id = i.user_id AND i.is_profile_pic = 1
 			WHERE u.id != ?
@@ -174,11 +175,7 @@ router.get("/search", (req, res) => {
 		const filtered = users.map(user => {
 			const age = calculateAge(user.birthdate);
 			const distance = calculateDistance(me.latitude, me.longitude, user.latitude, user.longitude);
-			const userTags = db.prepare(`
-				SELECT t.name FROM tags t
-				JOIN user_tags ut ON ut.tag_id = t.id
-				WHERE ut.user_id = ?
-			`).all(user.id).map(t => t.name);
+			const userTags = user.tags_string ? user.tags_string.split(',') : [];
 
 			return { ...user, age, distance, tags: userTags };
 		}).filter(user => {
@@ -188,13 +185,25 @@ router.get("/search", (req, res) => {
 			if (fameMax && user.fame_rating > Number(fameMax)) return false;
 			if (distanceMax && user.distance > Number(distanceMax)) return false;
 
-			if (tags) {
-				const tagsArray = typeof tags === 'string' ? [tags] : tags;
-				const hasAllTags = tagsArray.every(reqTag => user.tags.includes(reqTag));
+			if (tagsInput) {
+				let searchTags = [];
+				if (Array.isArray(tagsInput)) {
+					searchTags = tagsInput;
+				} else if (typeof tagsInput === 'string') {
+					searchTags = tagsInput.split(',').filter(t => t.trim() !== '');
+				}
+
+				const searchTagsLower = searchTags.map(t => t.trim().toLowerCase());
+				const userTagsLower = user.tags.map(t => t.toLowerCase());
+
+				const hasAllTags = searchTagsLower.every(reqTag => 
+					userTagsLower.includes(reqTag)
+				);
+
 				if (!hasAllTags) return false;
 			}
-			return true;
-		});
+            return true;
+        });
 
 		res.json(filtered);
 
