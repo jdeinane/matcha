@@ -62,14 +62,33 @@ router.get("/suggestions", (req, res) => {
 		let genderCondition = "";
 		const params = [currentUserId];
 
+		const myGender = me.gender.toLowerCase();
+		const myPref = me.sexual_preference.toLowerCase();
+
 		// Gestion (basique) de l'orientation
-		if (me.sexual_preference === 'heterosexual') {
-			genderCondition = "AND gender != ?";
-			params.push(me.gender); // Cherche le genre oppose
-		} else if (me.sexual_preference === 'gay') {
-			genderCondition = "AND gender = ?";
-			params.push(me.gender); // Cherche le meme genre
-		} // Si bi -> pas de restriction
+		if (myPref === 'heterosexual') {
+			genderCondition = `
+				AND gender != ? 
+				AND (sexual_preference = 'heterosexual' OR sexual_preference = 'bisexual')
+			`;
+			params.push(myGender);
+
+		} else if (myPref === 'gay') {
+			genderCondition = `
+				AND gender = ? 
+				AND (sexual_preference = 'gay' OR sexual_preference = 'bisexual')
+			`;
+			params.push(myGender);
+		} else {
+			genderCondition = `
+				AND (
+					(gender = ? AND (sexual_preference = 'gay' OR sexual_preference = 'bisexual'))
+					OR
+					(gender != ? AND (sexual_preference = 'heterosexual' OR sexual_preference = 'bisexual'))
+				)
+			`;
+			params.push(myGender, myGender);
+		}
 
 		// 3. Recuperer les candidats potentiels
 		// On exclut soi-meme et les comptes non verifies

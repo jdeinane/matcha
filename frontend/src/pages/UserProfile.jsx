@@ -180,14 +180,48 @@ const UserProfile = () => {
 							@{user.username}
 						</span>
 					</div>
-					<div className="profile-meta">
-						<span className="status-indicator" style={{ background: user.is_online ? 'var(--matcha)' : '#ccc' }}></span>
+				<div className="profile-meta" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+					{/* 1. Statut Online */}
+					<div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.8rem', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+						<span className="status-indicator" style={{ 
+							background: user.is_online ? 'var(--matcha)' : '#ccc',
+							width: '10px', height: '10px', borderRadius: '50%', display: 'inline-block'
+						}}></span>
 						{user.is_online ? "Currently Online" : `Last seen ${user.last_seen || "recently"}`}
-						<br /><br />
-						{user.age} Years Old — Based in {user.city}
+					</div>
 
-					<div style={{ marginTop: '10px', fontSize: '0.65rem', letterSpacing: '0.1em', opacity: 0.8 }}>
-						POPULARITY INDEX: <span style={{ color: 'var(--matcha)', fontWeight: 'bold' }}>{user.fame_rating} PTS</span>
+					{/* 2. Bloc Infos Principales (Aligné et propre) */}
+					<div style={{ 
+						display: 'flex', 
+						flexDirection: 'column', 
+						gap: '4px', // Espace entre les lignes
+						marginTop: '10px',
+						fontFamily: 'var(--font-main)', // Assure la même police
+						textTransform: 'uppercase',      // Tout en majuscule pour le style "clean"
+						fontSize: '0.9rem',
+						letterSpacing: '0.05em'
+					}}>
+						{/* Ligne 1 : Age + Genre + Orientation */}
+						<div>
+							{user.age} YEARS OLD <span style={{ color: 'var(--matcha)' }}>•</span> {user.gender} <span style={{ color: 'var(--matcha)' }}>•</span> {user.sexual_preference}
+						</div>
+
+						{/* Ligne 2 : Ville */}
+						<div style={{ color: 'var(--text-muted)' }}>
+							BASED IN {user.city}
+						</div>
+					</div>
+
+					{/* 3. Popularité */}
+					<div style={{ 
+						marginTop: '15px', 
+						fontSize: '0.7rem', 
+						letterSpacing: '0.2em', 
+						opacity: 0.8,
+						paddingTop: '10px',
+						width: 'fit-content'
+					}}>
+						POPULARITY SCORE: <span style={{ color: 'var(--matcha)', fontWeight: 'bold', fontSize: '0.9rem' }}>{user.fame_rating}</span>
 					</div>
 				</div>
 				<div className="profile-section">
