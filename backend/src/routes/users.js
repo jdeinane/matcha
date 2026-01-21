@@ -50,7 +50,7 @@ router.get("/profile", (req, res) => {
 
 		if (!user)
 			return res.status(404).json({ error: "User not found" });
-	
+
 		const tags = db.prepare(`
 			SELECT t.name FROM tags t
 			JOIN user_tags ut ON ut.tag_id = t.id
@@ -62,7 +62,7 @@ router.get("/profile", (req, res) => {
 		`).all(user.id);
 
 		res.json({ ...user, tags, images });
-	
+
 	} catch (error) {
 		console.error(error);
 		res.status(500).json({ error: "Server error" });
@@ -112,32 +112,44 @@ router.put("/profile", (req, res) => {
 });
 
 /* POST PHOTO */
-router.post("/photos", upload.single('image'), (req, res) => {
-	if (!req.file)
-		return res.status(400).json({ error: "No image uploaded" });
+router.post("/photos", (req, res) => {
 
-	try {
-		const count = db.prepare("SELECT COUNT(*) as count FROM images WHERE user_id = ?").get(req.user.id);
-		if (count.count >= 5) {
-			fs.unlinkSync(req.file.path);
-			return res.status(400).json({ error: "Maximum 5 photos allowed" });
+	const uploadSingle = upload.single('image');
+
+	uploadSingle(req, res, (err) => {
+		if (err) {
+			return res.status(400).json({ error: err.message });
 		}
 
-		const isFirst = count.count === 0 ? 1 : 0;
-		const webPath = "/uploads/" + req.file.filename;
+		if (!req.file)
+			return res.status(400).json({ error: "No image uploaded" });
 
-		const insertImage = db.prepare("INSERT INTO images (user_id, file_path, is_profile_pic) VALUES (?, ?, ?)");
-		const info = insertImage.run(req.user.id, webPath, isFirst);
+		try {
+			const count = db.prepare("SELECT COUNT(*) as count FROM images WHERE user_id = ?").get(req.user.id);
+			if (count.count >= 5) {
+				fs.unlinkSync(req.file.path);
+				return res.status(400).json({ error: "Maximum 5 photos allowed" });
+			}
 
-		res.status(201).json({
-			message: "Image uploaded",
-			image: { id: info.lastInsertRowid, url: webPath, is_profile_pic: isFirst},
-		});
+			const isFirst = count.count === 0 ? 1 : 0;
+			const webPath = "/uploads/" + req.file.filename;
 
-	} catch (error) {
-		console.error(error);
-		res.status(500).json({ error: "Server error" });
-	}
+			const insertImage = db.prepare("INSERT INTO images (user_id, file_path, is_profile_pic) VALUES (?, ?, ?)");
+			const info = insertImage.run(req.user.id, webPath, isFirst);
+
+			res.status(201).json({
+				message: "Image uploaded",
+				image: { id: info.lastInsertRowid, url: webPath, is_profile_pic: isFirst},
+			});
+
+		} catch (error) {
+			if (req.file && req.file.path && fs.existsSync(req.file.path)) {
+				fs.unlinkSync(req.file.path);
+			}
+			console.error(error);
+			res.status(500).json({ error: "Server error" });
+		}
+	});
 });
 
 /* DELETE PHOTOS */
