@@ -80,7 +80,7 @@ const Search = () => {
 			<div className="card" style={{ padding: '40px', marginBottom: '80px', background: 'var(--bg-card)', border: '1px solid var(--text-main)' }}>
 				<form onSubmit={handleSearch} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '40px' }}>
 					<div className="input-group">
-						<label>Prefered Age</label>
+						<label>Age range</label>
 						<div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
 							<input type="number" name="ageMin" min="18" value={searchParams.ageMin} onChange={handleChange} style={{ fontSize: '1.2rem', padding: '10px 0' }} />
 							<span style={{ fontFamily: 'var(--font-heading)', fontStyle: 'italic' }}>to</span>

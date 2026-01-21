@@ -146,7 +146,7 @@ const Browsing = () => {
 					border: '1px solid var(--text-main)'
 				}}>
 					<div className="input-group">
-						<label>Age Range ({filters.ageMin} - {filters.ageMax})</label>
+						<label>Age Range</label>
 						<div style={{ display: 'flex', gap: '10px' }}>
 							<input type="number" name="ageMin" min="18" value={filters.ageMin} onChange={handleFilterChange} placeholder="Min" />
 							<input type="number" name="ageMax" max="99" value={filters.ageMax} onChange={handleFilterChange} placeholder="Max" />
@@ -154,7 +154,7 @@ const Browsing = () => {
 					</div>
 
 					<div className="input-group">
-						<label>Min Popularity ({filters.fameMin})</label>
+						<label>Popularity (min)</label>
 						<input type="number" name="fameMin" min="0" value={filters.fameMin} onChange={handleFilterChange} />
 					</div>
 
