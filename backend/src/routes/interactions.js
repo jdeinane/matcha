@@ -84,11 +84,25 @@ router.post("/unlike", (req, res) => {
 		const info = db.prepare("DELETE FROM likes WHERE liker_id = ? AND liked_id = ?").run(liker_id, target_id);
 
 		if (info.changes > 0) {
-			
+			db.prepare(`
+				UPDATE messages 
+				SET is_read = 1 
+				WHERE (sender_id = ? AND receiver_id = ?) 
+				OR (sender_id = ? AND receiver_id = ?)
+			`).run(liker_id, target_id, target_id, liker_id);
+
 			// 2. Baisser la popularite si unliked (MIN 0)
 			db.prepare("UPDATE users SET fame_rating = MAX(0, fame_rating - 5) WHERE id = ?").run(target_id);
 		
-			// Socket
+			// 3. Envoi la notif (oui le sujet le sujet le demande meme si je trouve ca bizarre)
+			db.prepare("INSERT INTO notifications (recipient_id, sender_id, type) VALUES (?, ?, 'unlike')").run(target_id, liker_id);
+			
+			notifyUser(target_id, "notification", { 
+				type: "unlike", 
+				message: `${req.user.username} unliked you.`,
+				sender_id: liker_id
+			});
+
 			notifyUser(target_id, "unmatch", { user_id: liker_id });
 		}
 
@@ -115,6 +129,13 @@ router.post("/block", (req, res) => {
 		// Retirer les likes mutuels -> le blocage casse le match
 		db.prepare("DELETE FROM likes WHERE liker_id = ? AND liked_id = ?").run(blockerId, target_id);
 		db.prepare("DELETE FROM likes WHERE liker_id = ? AND liked_id = ?").run(target_id, blockerId);
+
+		db.prepare(`
+				UPDATE messages 
+				SET is_read = 1 
+				WHERE (sender_id = ? AND receiver_id = ?) 
+				OR (sender_id = ? AND receiver_id = ?)
+			`).run(blockerId, target_id, target_id, blockerId);
 
 		res.json({ success: true });
 
@@ -161,35 +182,34 @@ router.post("/unblock", (req, res) => {
 
 /* POST REPORT: Report user */
 router.post("/report", async (req, res) => {
-    try {
-        const { target_id, reason } = req.body;
-        const reporterId = req.user.id;
+	try {
+		const { target_id, reason } = req.body;
+		const reporterId = req.user.id;
 
-        db.prepare("INSERT OR IGNORE INTO reports (reporter_id, reported_id, reason) VALUES (?, ?, ?)").run(reporterId, target_id, reason || "No reason");
+		db.prepare("INSERT OR IGNORE INTO reports (reporter_id, reported_id, reason) VALUES (?, ?, ?)").run(reporterId, target_id, reason || "No reason");
 
-        
-        const reporter = db.prepare("SELECT username FROM users WHERE id = ?").get(reporterId);
-        const reported = db.prepare("SELECT username, email FROM users WHERE id = ?").get(target_id);
+		const reporter = db.prepare("SELECT username FROM users WHERE id = ?").get(reporterId);
+		const reported = db.prepare("SELECT username, email FROM users WHERE id = ?").get(target_id);
 
-        const adminEmail = "admin@matcha.com";
-        const subject = `[REPORT] User Reported: ${reported.username}`;
-        const html = `
-            <h3>New User Report</h3>
-            <p><strong>Reporter:</strong> ${reporter.username} (ID: ${reporterId})</p>
-            <p><strong>Reported User:</strong> ${reported.username} (ID: ${target_id})</p>
-            <p><strong>Reason:</strong> ${reason || "No reason provided"}</p>
-            <br>
-            <p>Please check the admin panel.</p>
-        `;
+		const adminEmail = "admin@matcha.com";
+		const subject = `[REPORT] User Reported: ${reported.username}`;
+		const html = `
+			<h3>New User Report</h3>
+			<p><strong>Reporter:</strong> ${reporter.username} (ID: ${reporterId})</p>
+			<p><strong>Reported User:</strong> ${reported.username} (ID: ${target_id})</p>
+			<p><strong>Reason:</strong> ${reason || "No reason provided"}</p>
+			<br>
+			<p>Please check the admin panel.</p>
+		`;
 
-        sendEmail(adminEmail, subject, html); 
+		sendEmail(adminEmail, subject, html);
 
-        res.json({ message: "User reported" });
+		res.json({ message: "User reported" });
 
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: "Server error" });
-    }
+	} catch (error) {
+		console.error(error);
+		res.status(500).json({ error: "Server error" });
+	}
 });
 
 export default router;
