@@ -43,7 +43,7 @@ router.post("/like", (req, res) => {
 
 		if (likedBack) {
 			// C'est un match -> creer une notif 'Match' pour les deux
-			db.prepare("UPDATE users SET fame_rating = fame_rating + 5 WHERE id = ?").run(target_id);
+			db.prepare("UPDATE users SET fame_rating = MIN(200, fame_rating + 5) WHERE id = ?").run(target_id);
 			db.prepare("INSERT INTO notifications (recipient_id, sender_id, type) VALUES (?, ?, 'match')").run(target_id, liker_id);
 			db.prepare("INSERT INTO notifications (recipient_id, sender_id, type) VALUES (?, ?, 'match')").run(liker_id, target_id);
 			
@@ -61,7 +61,7 @@ router.post("/like", (req, res) => {
 			// Juste un like simple -> Notif 'Like'
 			db.prepare("INSERT INTO notifications (recipient_id, sender_id, type) VALUES (?, ?, 'like')").run(target_id, liker_id);
 			// Popularite augmente -> +5 points pour un like recu
-			db.prepare("UPDATE users SET fame_rating = fame_rating + 5 WHERE id = ?").run(target_id);
+			db.prepare("UPDATE users SET fame_rating = MIN(200, fame_rating + 5) WHERE id = ?").run(target_id);
 
 			// Socket
 			notifyUser(target_id, "notification", { type: "like", message: `${req.user.username} liked you!` });

@@ -59,7 +59,7 @@ const runSeed = async () => {
 	console.log(`Generating ${USERS_COUNT} users...`);
 
 		for (let i = 0; i < USERS_COUNT; i++) {
-		const birthdate = faker.date.birthdate({ min: 18, max: 60, mode: 'age' }).toISOString().split('T')[0];
+			const birthdate = faker.date.birthdate({ min: 18, max: 60, mode: 'age' }).toISOString().split('T')[0];
 			const sex = faker.person.sexType();
 			const firstName = faker.person.firstName(sex);
 			const lastName = faker.person.lastName();
@@ -76,7 +76,7 @@ const runSeed = async () => {
 				sex,
 				faker.helpers.arrayElement(['heterosexual', 'gay', 'bisexual']),
 				faker.person.bio(),
-				faker.number.float({ min: 0, max: 100, fractionDigits: 1 }), // fame_rating
+				faker.number.int({ min: 0, max: 200 }), // fame_rating
 				location[0], // lat
 				location[1], //lon
 				"Paris",
