@@ -14,6 +14,7 @@ if (!process.env.JWT_SECRET) {
 }
 
 const JWT_SECRET = process.env.JWT_SECRET;
+const clientUrl = process.env.CORS_ORIGIN || "http://localhost:3000";
 
 /* REGISTER */
 router.post("/register", async (req, res) => {
@@ -53,7 +54,7 @@ router.post("/register", async (req, res) => {
 			validatedData.birthdate
 		);
 
-		const verifyLink = `http://localhost:5173/verify/${verifyToken}`;
+		const verifyLink = `${clientUrl}/verify/${verifyToken}`;
 		await sendEmail(
 			validatedData.email, 
 			"Verify your Matcha account", 
@@ -191,7 +192,7 @@ router.post("/forgot-password", async (req, res) => {
 		updateToken.run(resetToken, user.id);
 
 		// 3. Envoyer l'email
-		const resetLink = `http://localhost:5173/reset-password/${resetToken}`;
+		const resetLink = `${clientUrl}/reset-password/${resetToken}`;
 		await sendEmail(
 			email,
 			"Reset your Password",

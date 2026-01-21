@@ -5,6 +5,7 @@ import cookieParser from "cookie-parser";
 import rateLimit from "express-rate-limit";
 import morgan from "morgan";
 import path from "path";
+import { fileURLToPath } from "url";
 
 import authRoutes from "./routes/auth.js";
 import usersRoutes from "./routes/users.js";
@@ -13,6 +14,9 @@ import interactionsRoutes from "./routes/interactions.js";
 import notificationsRoutes from "./routes/notifications.js";
 import chatRoutes from "./routes/chat.js";
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 if (!process.env.JWT_SECRET && process.env.NODE_ENV === 'production') {
 	console.error("❌ FATAL: JWT_SECRET missing in production.");
 	process.exit(1);
@@ -20,7 +24,7 @@ if (!process.env.JWT_SECRET && process.env.NODE_ENV === 'production') {
 
 export function createApp() {
 	const app = express();
-	const origin = process.env.CORS_ORIGIN || "http://localhost:5173";
+	const origin = process.env.CORS_ORIGIN || "http://localhost:3000";
 	const limiter = rateLimit({
 		windowMs: 15 * 60 * 1000,
 		max: 1000,
@@ -30,7 +34,8 @@ export function createApp() {
 	app.use(morgan("dev"));
 
 	app.use(helmet({
-		crossOriginResourcePolicy: { policy: "cross-origin" }
+		crossOriginResourcePolicy: { policy: "cross-origin" },
+		contentSecurityPolicy: false
 	}));
 
 	app.use("/api", limiter);
@@ -47,6 +52,8 @@ export function createApp() {
 
 	app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 
+	app.use(express.static(path.join(__dirname, '../../frontend/dist')));
+
 	app.use("/api/auth", authRoutes);
 
 	app.use("/api/browsing", browsingRoutes);
@@ -61,6 +68,10 @@ export function createApp() {
 
 	app.get("/api/health", (req, res) => {
 		res.json({ status: "ok", message: "Backend is running!" });
+	});
+
+	app.get(/.*/, (req, res) => {
+		res.sendFile(path.join(__dirname, '../../frontend/dist/index.html'));
 	});
 
 	app.use((err, req, res, next) => {
