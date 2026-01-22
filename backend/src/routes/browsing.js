@@ -48,7 +48,7 @@ router.get("/suggestions", (req, res) => {
 		// 1. Recuperer mon profil complet
 		const me = db.prepare("SELECT * FROM users WHERE id = ?").get(currentUserId);
 		if (!me)
-			return res.status(404).json({ error: "User profile not found. Please login again." });
+			return res.json({ error: "User profile not found. Please login again." });
 		
 		if (!me.gender || !me.sexual_preference || !me.sexual_preference) {
 			return res.json([]); 
@@ -164,7 +164,7 @@ router.get("/search", (req, res) => {
 		const me = db.prepare("SELECT latitude, longitude FROM users WHERE id = ?").get(currentUserId);
 
 		if (!me) {
-			return res.status(404).json({ error: "User not found" });
+			return res.json({ error: "User not found" });
 		}
 
 		if (!me.latitude || !me.longitude) {
@@ -238,7 +238,7 @@ router.get("/user/:id", (req, res) => {
 		`).get(visitorId, targetId, targetId, visitorId);
 
 		if (blockCheck) {
-			return res.status(403).json({ error: "User not found or blocked" });
+			return res.json({ error: "User not found or blocked" });
 		}
 
 		// 1. Recuperer le user
@@ -248,7 +248,7 @@ router.get("/user/:id", (req, res) => {
 		`).get(targetId);
 
 		if (!user)
-			return res.status(404).json({ error: "User not found" });
+			return res.json({ error: "User not found" });
 
 		// 2. Infos supplementaires (tags, images)
 		user.age = calculateAge(user.birthdate);

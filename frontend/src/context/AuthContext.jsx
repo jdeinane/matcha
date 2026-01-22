@@ -28,10 +28,25 @@ export const AuthProvider = ({ children }) => {
 	}, []);
 
 	const login = async (username, password) => {
+		try {
 			const res = await axios.post("/api/auth/login", { username, password });
-			setUser(res.data.user);
+			
+			// Check for error response at 200 status
+			if (res.data?.success === false || res.data?.error) {
+				return res.data;
+			}
+			
+			// Set user on successful login
+			if (res.data.user) {
+				setUser(res.data.user);
+			}
+			
 			return res.data;
-		};
+		} catch (error) {
+			console.error("Login error:", error);
+			throw error;
+		}
+	};
 
 	const logout = async () => {
 		try {

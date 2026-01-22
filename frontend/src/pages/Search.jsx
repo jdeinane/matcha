@@ -55,11 +55,28 @@ const Search = () => {
 			};
 
 			const res = await axios.get("/api/browsing/search", { params });
-			setResults(res.data);
+			const data = res.data;
+			
+			if (data?.success === false || data?.error) {
+				toast.error(data.error || "Error during search");
+				setResults([]);
+				setSearched(true);
+				return;
+			}
+			
+			if (!Array.isArray(data)) {
+				toast.error("Unexpected response from server");
+				setResults([]);
+				setSearched(true);
+				return;
+			}
+			
+			setResults(data);
 			setSearched(true);
 		} catch (error) {
-			toast.error("Error during search");
-			console.error(error);
+			toast.error(error.response?.data?.error || "Error during search");
+			setResults([]);
+			setSearched(true);
 		}
 	};
 

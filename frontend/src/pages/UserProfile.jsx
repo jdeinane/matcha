@@ -48,10 +48,17 @@ const UserProfile = () => {
 	const fetchUser = useCallback(async () => {
 		try {
 			const res = await axios.get(`/api/browsing/user/${id}`);
+			
+			if (res.data?.success === false || res.data?.error) {
+				toast.error(res.data.error || "User not found or blocked");
+				navigate("/");
+				return;
+			}
+			
 			setUser(res.data);
 			setLoading(false);
 		} catch (error) {
-			toast.error("User not found or blocked");
+			toast.error(error.response?.data?.error || "User not found or blocked");
 			navigate("/");
 		}
 	}, [id, navigate]);
@@ -63,7 +70,13 @@ const UserProfile = () => {
 	const handleLike = async () => {
 		try {
 			if (user.is_liked) {
-				await axios.post("/api/interactions/unlike", { target_id: user.id });
+				const res = await axios.post("/api/interactions/unlike", { target_id: user.id });
+				
+				if (res.data?.success === false || res.data?.error) {
+					toast.error(res.data.error || "Failed to unlike");
+					return;
+				}
+				
 				setUser(prev => ({
 					...prev,
 					is_liked: false,
@@ -73,6 +86,11 @@ const UserProfile = () => {
 				toast.info("Unliked");
 			} else {
 				const res = await axios.post("/api/interactions/like", { target_id: user.id });
+
+				if (res.data?.success === false || res.data?.error) {
+					toast.error(res.data.error || "Failed to like");
+					return;
+				}
 
 				const hasMatched = res.data.is_match === true;
 
@@ -95,11 +113,17 @@ const UserProfile = () => {
 			return;
 
 		try {
-			await axios.post("/api/interactions/block", { target_id: user.id });
+			const res = await axios.post("/api/interactions/block", { target_id: user.id });
+			
+			if (res.data?.success === false || res.data?.error) {
+				toast.error(res.data.error || "Error blocking user");
+				return;
+			}
+			
 			toast.success("User blocked");
 			navigate("/");
 		} catch (error) {
-			toast.error("Error blocking user");
+			toast.error(error.response?.data?.error || "Error blocking user");
 		}
 	};
 
@@ -109,10 +133,16 @@ const UserProfile = () => {
 			return;
 
 		try {
-			await axios.post("/api/interactions/report", { target_id: user.id, reason});
+			const res = await axios.post("/api/interactions/report", { target_id: user.id, reason});
+			
+			if (res.data?.success === false || res.data?.error) {
+				toast.error(res.data.error || "Error reporting user");
+				return;
+			}
+			
 			toast.success("User reported to admins");
 		} catch (error) {
-			toast.error("Error reporting user");
+			toast.error(error.response?.data?.error || "Error reporting user");
 		}
 	};
 

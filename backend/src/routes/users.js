@@ -49,7 +49,7 @@ router.get("/profile", (req, res) => {
 		`).get(req.user.id);
 
 		if (!user)
-			return res.status(404).json({ error: "User not found" });
+			return res.json({ error: "User not found" });
 
 		const tags = db.prepare(`
 			SELECT t.name FROM tags t
@@ -105,7 +105,7 @@ router.put("/profile", (req, res) => {
 
 	} catch (error) {
 		if (error.issues)
-			return res.status(400).json({ error: error.issues[0].message });
+			return res.json({ error: error.issues[0].message });
 		console.error(error);
 		res.status(500).json({ error: "Server error" });
 	}
@@ -118,17 +118,17 @@ router.post("/photos", (req, res) => {
 
 	uploadSingle(req, res, (err) => {
 		if (err) {
-			return res.status(400).json({ error: err.message });
+			return res.json({ error: err.message });
 		}
 
 		if (!req.file)
-			return res.status(400).json({ error: "No image uploaded" });
+			return res.json({ error: "No image uploaded" });
 
 		try {
 			const count = db.prepare("SELECT COUNT(*) as count FROM images WHERE user_id = ?").get(req.user.id);
 			if (count.count >= 5) {
 				fs.unlinkSync(req.file.path);
-				return res.status(400).json({ error: "Maximum 5 photos allowed" });
+			return res.json({ error: "Maximum 5 photos allowed" });
 			}
 
 			const isFirst = count.count === 0 ? 1 : 0;
@@ -159,7 +159,7 @@ router.delete("/photos/:id", (req, res) => {
 		const image = db.prepare("SELECT * FROM images WHERE id = ? AND user_id = ?").get(imageId, req.user.id);
 
 		if (!image)
-			return res.status(404).json({ error: "Image not found" });
+			return res.json({ error: "Image not found" });
 
 		const filename = path.basename(image.file_path);
 		const fullPath = path.join("uploads", filename);
@@ -189,7 +189,7 @@ router.put("/photos/:id/profile", (req, res) => {
 		const image = db.prepare("SELECT id FROM images WHERE id = ? AND user_id = ?").get(imageId, req.user.id);
 
 		if (!image)
-			return res.status(404).json({ error: "Image not found" });
+			return res.json({ error: "Image not found" });
 
 		const setProfilePic = db.transaction(() => {
 			db.prepare("UPDATE images SET is_profile_pic = 0 WHERE user_id = ?").run(req.user.id);
@@ -214,7 +214,7 @@ router.put("/account", (req, res) => {
 		if (email) {
 			const emailExists = db.prepare("SELECT id FROM users WHERE email = ? AND id != ?").get(email, currentUserId);
 			if (emailExists)
-				return res.status(409).json({ error: "Email already in use."});
+				return res.json({ error: "Email already in use."});
 		}
 
 		// 2. Construire la requete dynamique (on update que ce qui est envoye)
@@ -246,7 +246,7 @@ router.put("/account", (req, res) => {
 
 	} catch (error) {
 		if (error.issues)
-			return res.status(400).json({ error: error.issues[0].message });
+			return res.json({ error: error.issues[0].message });
 		console.error(error);
 		res.status(500).json({ error: "Server error" });
 	}
@@ -264,7 +264,7 @@ router.put("/location", (req, res) => {
 		res.json({ message: "Location updated" });
 
 	} catch (error) {
-		if (error.issues) return res.status(400).json({ error: error.issues[0].message });
+		if (error.issues) return res.json({ error: error.issues[0].message });
 		console.error(error);
 		res.status(500).json({ error: "Server error" });
 	}

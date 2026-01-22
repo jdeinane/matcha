@@ -69,7 +69,7 @@ router.get("/messages/:id", (req, res) => {
 		`).get(currentUserId, targetId, targetId, currentUserId);
 
 		if (match.count < 2)
-			return res.status(403).json({ error: "You must match to chat." });
+			return res.json({ error: "You must match to chat." });
 
 		const messages = db.prepare(`
 			SELECT id, sender_id, content, created_at, is_read 
@@ -99,7 +99,7 @@ router.post("/messages/:id", (req, res) => {
 		const senderId = req.user.id;
 
 		if (!content || !content.trim()) 
-			return res.status(400).json({ error: "Message empty" });
+			return res.json({ error: "Message empty" });
 
 		// Verif Match
 		const match = db.prepare(`
@@ -108,7 +108,7 @@ router.post("/messages/:id", (req, res) => {
 		`).get(senderId, recipient_id, recipient_id, senderId);
 
 		if (match.count < 2)
-			return res.status(403).json({ error: "You must match to chat." });
+			return res.json({ error: "You must match to chat." });
 
 		// Insertion
 		const insert = db.prepare(`

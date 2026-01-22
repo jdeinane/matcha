@@ -51,9 +51,22 @@ const Chat = () => {
 	const fetchConversations = async () => {
 		try {
 			const res = await axios.get("/api/chat/conversations");
+			
+			if (res.data?.success === false || res.data?.error) {
+				toast.error(res.data.error || "Failed to load conversations");
+				setConversations([]);
+				return;
+			}
+			
+			if (!Array.isArray(res.data)) {
+				setConversations([]);
+				return;
+			}
+			
 			setConversations(res.data);
 		} catch (err) {
-			console.error(err);
+			toast.error(err.response?.data?.error || "Error loading conversations");
+			setConversations([]);
 		}
 	};
 
@@ -61,6 +74,18 @@ const Chat = () => {
 		try {
 			setSelectedUser(user);
 			const res = await axios.get(`/api/chat/messages/${user.id}`);
+			
+			if (res.data?.success === false || res.data?.error) {
+				toast.error(res.data.error || "Failed to load messages");
+				setMessages([]);
+				return;
+			}
+			
+			if (!Array.isArray(res.data)) {
+				setMessages([]);
+				return;
+			}
+			
 			setMessages(res.data);
 
 			setConversations(prev => prev.map(c => 
@@ -71,7 +96,7 @@ const Chat = () => {
 			}
 			setTimeout(() => scrollRef.current?.scrollIntoView(), 100);
 		} catch (err) {
-			toast.error("Error loading chat");
+			toast.error(err.response?.data?.error || "Error loading chat");
 		}
 	};
 
@@ -82,12 +107,17 @@ const Chat = () => {
 		try {
 			const res = await axios.post(`/api/chat/messages/${selectedUser.id}`, { content: newMessage });
 			
+			if (res.data?.success === false || res.data?.error) {
+				toast.error(res.data.error || "Message send failed");
+				return;
+			}
+			
 			setMessages([...messages, res.data]);
 			setNewMessage("");
 			fetchConversations();
 
 		} catch (err) {
-			toast.error("Message send failed");
+			toast.error(err.response?.data?.error || "Message send failed");
 		}
 	};
 

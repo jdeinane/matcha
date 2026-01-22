@@ -30,10 +30,28 @@ const Browsing = () => {
 		try {
 			setLoading(true);
 			const res = await axios.get("/api/browsing/suggestions");
-			setUsers(res.data);
+			const data = res.data;
+
+			if (data?.success === false || data?.error) {
+				toast.error(data.error || "Could not load suggestions");
+				setUsers([]);
+				setLoading(false);
+				return;
+			}
+
+			if (!Array.isArray(data)) {
+				toast.error("Unexpected response from server");
+				setUsers([]);
+				setLoading(false);
+				return;
+			}
+
+			setUsers(data);
 			setLoading(false);
 		} catch (error) {
-			toast.error("Error fetching suggestions");
+			const message = error.response?.data?.error || "Error fetching suggestions";
+			toast.error(message);
+			setUsers([]);
 			setLoading(false);
 		}
 	};

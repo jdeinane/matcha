@@ -10,11 +10,26 @@ const Home = () => {
 		const fetchTopPicks = async () => {
 			try {
 				const res = await axios.get("/api/browsing/suggestions");
-				const shuffled = res.data.sort(() => 0.5 - Math.random());
+				const data = res.data;
+				
+				if (data?.success === false || data?.error) {
+					setTopProfiles([]);
+					setLoading(false);
+					return;
+				}
+				
+				if (!Array.isArray(data)) {
+					setTopProfiles([]);
+					setLoading(false);
+					return;
+				}
+				
+				const shuffled = data.sort(() => 0.5 - Math.random());
 				setTopProfiles(shuffled.slice(0, 5));
 				setLoading(false);
 			} catch (error) {
 				console.error(error);
+				setTopProfiles([]);
 				setLoading(false);
 			}
 		};

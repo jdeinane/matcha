@@ -15,7 +15,14 @@ const VerifyEmail = () => {
 		const verifyAccount = async () => {
 			try {
 				// On envoie le token au backend pour valider le compte
-				await axios.post("/api/auth/verify-email", { token });
+				const res = await axios.post("/api/auth/verify-email", { token });
+				
+				if (res.data?.success === false || res.data?.error) {
+					toast.error(res.data.error || "Invalid or expired token.");
+					navigate("/register");
+					return;
+				}
+				
 				toast.success("Account successfully verified! You can now log in.");
 				navigate("/login");
 			} catch (error) {

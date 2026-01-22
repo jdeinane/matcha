@@ -25,11 +25,11 @@ router.post("/register", async (req, res) => {
 		// 2. Verifie si l'utilisateur existe deja
 		const userExists = db.prepare("SELECT id FROM users WHERE LOWER(username) = LOWER(?)").get(validatedData.username);
 		if (userExists) {
-			return res.status(409).json({ error: "This username is already taken" });
+			return res.json({ success: false, error: "This username is already taken" });
 		}
 		const emailExists = db.prepare("SELECT id FROM users WHERE email = ?").get(validatedData.email);
 		if (emailExists) {
-			return res.status(409).json({ error: "An account with this email already exists" });
+			return res.json({ success: false, error: "An account with this email already exists" });
 		}
 
 		// 3. Hachage du MDP
@@ -65,10 +65,10 @@ router.post("/register", async (req, res) => {
 	
 	} catch (error) {
 		if (error.issues) {
-			return res.status(400).json({ error: error.issues[0].message });
+			return res.json({ success: false, error: error.issues[0].message });
 		}
 		console.error(error);
-		res.status(500).json({ error: "Server error." });
+		res.status(500).json({ error: "Server error" });
 	}
 });
 
@@ -76,7 +76,7 @@ router.post("/register", async (req, res) => {
 router.post("/verify-email", (req, res) => {
 	const { token } = req.body;
 	if (!token) {
-		return res.status(400).json({ error: "Missing token" });
+		return res.json({ success: false, error: "Missing token" });
 	}
 
 	const user = db.prepare(`
@@ -86,7 +86,7 @@ router.post("/verify-email", (req, res) => {
 	`).get(token);
 
 	if (!user) {
-		return res.status(400).json({ error: "Invalid or expired token." });
+		return res.json({ success: false, error: "Invalid or expired token." });
 	}
 
 	// Met a jour l'utilisateur
@@ -109,12 +109,12 @@ router.post("/login", async (req, res) => {
 
 		// 2. Verifications de base
 		if (!user || !(await bcrypt.compare(password, user.password_hash))) {
-			return res.status(401).json({ error: "Invalid credentials." });
+			return res.json({ success: false, error: "Invalid credentials." });
 		}
 
 		// 3. Verification du compte via email
 		if (user.is_verified === 0) {
-			return res.status(403).json({ error: "Please verify your email first." });
+			return res.json({ success: false, error: "Please verify your email first." });
 		}
 
 		// 4. Pour une 1ere connexion: tant que l'user n'a pas defini ses preferences, sa loca, et sa PP
@@ -150,7 +150,7 @@ router.post("/login", async (req, res) => {
 
 	} catch (error) {
 		console.error(error);
-		res.status(400).json({ error: "Invalid data or server error." });
+		res.json({ success: false, error: "Invalid data or server error." });
 	}
 });
 
@@ -176,13 +176,13 @@ router.get("/me", (req, res) => {
 
 		const user = db.prepare("SELECT id, username, first_name, last_name, email, is_verified FROM users WHERE id = ?").get(decoded.id);
 		if (!user) {
-			return res.status(401).json({ authenticated: false });
+			return res.json({ authenticated: false });
 		}
 		
 		res.json({ authenticated: true, user });
 	
 	} catch (err) {
-		res.status(401).json({ authenticated: false, user:null });
+		res.json({ authenticated: false, user:null });
 	}
 });
 
@@ -218,7 +218,7 @@ router.post("/forgot-password", async (req, res) => {
 
 	} catch (error) {
 		if (error.issues)
-			return res.status(400).json({ error: error.issues[0].message });
+			return res.json({ success: false, error: error.issues[0].message });
 		console.error(error);
 		res.status(500).json({ error: "Server error" });
 	}
@@ -237,7 +237,7 @@ router.post("/reset-password", async (req, res) => {
 		`).get(token);
 
 		if (!user)
-			return res.status(400).json({ error: "Invalid or expired token." });
+			return res.json({ success: false, error: "Invalid or expired token." });
 
 		// 2. Hacher le nouveau MDP
 		const hashedPassword = await bcrypt.hash(newPassword, 10);
@@ -254,7 +254,7 @@ router.post("/reset-password", async (req, res) => {
 
 	} catch (error) {
 		if (error.issues)
-			return res.status(400).json({ error: error.issues[0].message });
+			return res.json({ success: false, error: error.issues[0].message });
 		console.error(error);
 		res.status(500).json({ error: "Server error" });
 	}

@@ -7,7 +7,7 @@ export const verifyToken = (req, res, next) => {
 	const token = req.cookies.token;
 
 	if (!token)
-		return res.status(401).json({ error: "Unauthorized: No token provided" });
+		return res.json({ error: "Unauthorized: No token provided" });
 
 	try {
 		// 2. Verifier la signature du token
@@ -19,6 +19,6 @@ export const verifyToken = (req, res, next) => {
 		next();
 	
 	} catch (err) {
-		return res.status(401).json({ error: "Unauthorized: Invalid token"});
+		return res.json({ error: "Unauthorized: Invalid token"});
 	}
 };

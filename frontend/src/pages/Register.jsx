@@ -21,8 +21,13 @@ const Register = () => {
 		try {
 			const { confirmPassword, ...dataToSend } = data;
 
-			await axios.post("/api/auth/register", dataToSend);
+			const res = await axios.post("/api/auth/register", dataToSend);
 
+			if (res.data.success === false) {
+				toast.error(res.data.error);
+				return;
+			}
+			
 			toast.success("Successfully registered! Please check your mailbox.");
 			navigate("/login");
 

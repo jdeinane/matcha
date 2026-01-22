@@ -15,10 +15,10 @@ router.post("/like", (req, res) => {
 		const hasPhoto = db.prepare("SELECT id FROM images WHERE user_id = ? AND is_profile_pic = 1").get(liker_id);
 
 		if (!target_id || target_id === liker_id)
-			return res.status(400).json({ error: "Invalid target" });
+			return res.json({ error: "Invalid target" });
 
 		if (!hasPhoto) {
-			return res.status(403).json({ error: "You must have a profile picture to like users." });
+			return res.json({ error: "You must have a profile picture to like users." });
 		}
 
 		const isBlocked = db.prepare(`
@@ -28,7 +28,7 @@ router.post("/like", (req, res) => {
 		`).get(liker_id, target_id, target_id, liker_id);
 
 		if (isBlocked)
-			return res.status(403).json({ error: "Action not allowed (blocked)" });
+			return res.json({ error: "Action not allowed (blocked)" });
 
 		// Verifier si deja like
 		const existingLike = db.prepare("SELECT id FROM likes WHERE liker_id = ? AND liked_id = ?").get(liker_id, target_id);
@@ -122,7 +122,7 @@ router.post("/block", (req, res) => {
 		const blockerId = req.user.id;
 
 		if (target_id === blockerId)
-			return res.status(400).json({ error: "Cannot block yourself" });
+			return res.json({ error: "Cannot block yourself" });
 
 		// On verifie s'il y avait des like avant le blocage (pour ajuster la fame)
 		const likeFromBlocker = db.prepare("SELECT id FROM likes WHERE liker_id = ? AND liked_id = ?").get(blockerId, target_id);

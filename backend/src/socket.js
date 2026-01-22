@@ -64,7 +64,7 @@ export const initSocket = (httpServer) => {
 		});
 
 		socket.on("disconnect", () => {
-			console.log(`❌ User ${userId} disconnected`);
+			console.log(`🔴 User ${userId} disconnected`);
 			onlineUsers.delete(userId);
 			try {
 				db.prepare("UPDATE users SET last_seen = datetime('now') WHERE id = ?").run(userId);
@@ -83,7 +83,7 @@ export const notifyUser = (userId, event, data) => {
 		console.log(`📡 Sending '${event}' to User ${targetId} (Socket ${socketId})`);
 		io.to(socketId).emit(event, data);
 	} else {
-		console.log(`⚠️ Failed to send '${event}': User ${targetId} is offline.`);
+		console.log(`🔴 User ${targetId} is offline.`);
 	}
 };
 

@@ -12,9 +12,15 @@ const Login = () => {
 		try {
 			const response = await login(data.username, data.password);
 
+			if (response?.success === false || response?.error) {
+				toast.error(response.error || "Login failed");
+				return;
+			}
+			
 			toast.success("Successfully logged in!");
 
-			if (response && response.user && response.user.is_complete === false) {
+			// Redirect based on profile completeness
+			if (response?.user?.is_complete === false) {
 				toast.info("Please complete your profile first!");
 				navigate("/settings");
 			} else {

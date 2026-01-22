@@ -29,13 +29,24 @@ const Profile = () => {
 	const fetchProfile = async () => {
 		try {
 			const res = await axios.get("/api/users/profile");
+			
+			if (res.data?.success === false || res.data?.error) {
+				toast.error(res.data.error || "Error fetching profile");
+				setLoading(false);
+				return;
+			}
+			
 			setProfile(res.data);
 
 			const [resVisits, resLikes] = await Promise.all([
 				axios.get("/api/users/visits"),
 				axios.get("/api/users/likes")
 			]);
-			setHistory({ visits: resVisits.data, likes: resLikes.data });
+			
+			setHistory({ 
+				visits: Array.isArray(resVisits.data) ? resVisits.data : [], 
+				likes: Array.isArray(resLikes.data) ? resLikes.data : [] 
+			});
 			setLoading(false);
 
 			// Pre-remplir les formulaires
@@ -52,7 +63,7 @@ const Profile = () => {
 			setLoading(false);
 
 		} catch (error) {
-			toast.error("Error fetching profile");
+			toast.error(error.response?.data?.error || "Error fetching profile");
 			setLoading(false);
 		}
 	};
@@ -60,19 +71,32 @@ const Profile = () => {
 	const fetchBlockedUsers = async () => {
 		try {
 			const res = await axios.get("/api/interactions/blocks");
-			setBlockedUsers(res.data);
+			
+			if (res.data?.success === false || res.data?.error) {
+				setBlockedUsers([]);
+				return;
+			}
+			
+			setBlockedUsers(Array.isArray(res.data) ? res.data : []);
 		} catch (err) {
 			console.error("Failed to fetch blocked users");
+			setBlockedUsers([]);
 		}
 	};
 
 	const handleUnblock = async (targetId) => {
 		try {
-			await axios.post("/api/interactions/unblock", { target_id: targetId });
+			const res = await axios.post("/api/interactions/unblock", { target_id: targetId });
+			
+			if (res.data?.success === false || res.data?.error) {
+				toast.error(res.data.error || "Failed to unblock");
+				return;
+			}
+			
 			toast.success("User unblocked");
 			setBlockedUsers(prev => prev.filter(u => u.id !== targetId));
 		} catch (err) {
-			toast.error("Failed to unblock");
+			toast.error(err.response?.data?.error || "Failed to unblock");
 		}
 	};
 
@@ -80,11 +104,17 @@ const Profile = () => {
 	const updateAccount = async (e) => {
 		e.preventDefault();
 		try {
-			await axios.put("/api/users/account", {
+			const res = await axios.put("/api/users/account", {
 				first_name: formData.first_name,
 				last_name: formData.last_name,
 				email: formData.email
 			});
+			
+			if (res.data?.success === false || res.data?.error) {
+				toast.error(res.data.error || "Error updating account");
+				return;
+			}
+			
 			toast.success("Account info updated!");
 			fetchProfile();
 
@@ -99,13 +129,19 @@ const Profile = () => {
 		try {
 			const tagsArray = formData.tags.split(",").map(t => t.trim()).filter(t => t.length > 0);
 
-			await axios.put("/api/users/profile", {
+			const res = await axios.put("/api/users/profile", {
 				gender: formData.gender,
 				sexual_preference: formData.sexual_preference,
 				biography: formData.biography,
 				tags: tagsArray,
 				birthdate: formData.birthdate
 			});
+			
+			if (res.data?.success === false || res.data?.error) {
+				toast.error(res.data.error || "Error updating profile");
+				return;
+			}
+			
 			toast.success("Profile details updated!");
 			fetchProfile();
 
@@ -123,9 +159,15 @@ const Profile = () => {
 		formDataImg.append("image", file);
 
 		try {
-			await axios.post("/api/users/photos", formDataImg, {
+			const res = await axios.post("/api/users/photos", formDataImg, {
 				headers: { "Content-Type": "multipart/form-data" }
 			});
+			
+			if (res.data?.success === false || res.data?.error) {
+				toast.error(res.data.error || "Upload failed");
+				return;
+			}
+			
 			toast.success("Photo uploaded!");
 			setFile(null);
 			fetchProfile();
@@ -137,23 +179,35 @@ const Profile = () => {
 
 	const handleDeletePhoto = async (id) => {
 		try {
-			await axios.delete(`/api/users/photos/${id}`);
+			const res = await axios.delete(`/api/users/photos/${id}`);
+			
+			if (res.data?.success === false || res.data?.error) {
+				toast.error(res.data.error || "Error deleting photo");
+				return;
+			}
+			
 			toast.success("Photo deleted");
 			fetchProfile();
 
 		} catch (error) {
-			toast.error("Error deleting photo");
+			toast.error(error.response?.data?.error || "Error deleting photo");
 		}
 	};
 
 	const handleSetProfilePic = async (id) => {
 		try {
-			await axios.put(`/api/users/photos/${id}/profile`);
+			const res = await axios.put(`/api/users/photos/${id}/profile`);
+			
+			if (res.data?.success === false || res.data?.error) {
+				toast.error(res.data.error || "Error updating profile picture");
+				return;
+			}
+			
 			toast.success("Profile picture updated");
 			fetchProfile();
 
 		} catch (error) {
-			toast.error("Error updating profile picture");
+			toast.error(error.response?.data?.error || "Error updating profile picture");
 		}
 	};
 
@@ -173,11 +227,17 @@ const Profile = () => {
 				const address = data.address || {};
 				const normalizedCity = address.city || address.town || address.village || address.municipality || manualCity;
 
-				await axios.put("/api/users/location", {
+				const res = await axios.put("/api/users/location", {
 					latitude: parseFloat(lat),
 					longitude: parseFloat(lon),
 					city: normalizedCity
 				});
+				
+				if (res.data?.success === false || res.data?.error) {
+					toast.error(res.data.error || "Error updating location");
+					return;
+				}
+				
 				setManualCity(normalizedCity);
 				toast.success(`Location updated : ${manualCity}`);
 				fetchProfile();
@@ -186,7 +246,7 @@ const Profile = () => {
 			}
 		} catch (error) {
 			console.error(error);
-			toast.error("Error while setting location manually");
+			toast.error(error.response?.data?.error || "Error while setting location manually");
 		}
 	};
 
@@ -219,18 +279,23 @@ const Profile = () => {
 						console.warn("Could not retrieve city name from coordinates", geoError);
 					}
 
-					await axios.put("/api/users/location", {
+					const res = await axios.put("/api/users/location", {
 						latitude,
 						longitude,
 						city: detectedCity
 					});
+					
+					if (res.data?.success === false || res.data?.error) {
+						toast.error(res.data.error || "Error saving location");
+						return;
+					}
 
 					toast.success(detectedCity ? `Location updated: ${detectedCity}` : "Location updated!");
 					fetchProfile();
 
 				} catch (error) {
 					console.error("Backend error:", error);
-					toast.error("Error saving location");
+					toast.error(error.response?.data?.error || "Error saving location");
 				}
 			},
 			(error) => {
@@ -262,11 +327,17 @@ const Profile = () => {
 		
 		if (confirm) {
 			try {
-				await axios.delete("/api/users/account");
+				const res = await axios.delete("/api/users/account");
+				
+				if (res.data?.success === false || res.data?.error) {
+					toast.error(res.data.error || "Failed to delete account");
+					return;
+				}
+				
 				toast.success("Account deleted. Farewell.");
 				logout();
 			} catch (error) {
-				toast.error("Failed to delete account");
+				toast.error(error.response?.data?.error || "Failed to delete account");
 			}
 		}
 	};
