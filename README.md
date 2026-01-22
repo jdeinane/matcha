@@ -19,7 +19,7 @@ Application de rencontre temps réel (projet `Matcha` de l'école 42) avec profi
 	- Nodemon, ESLint, @vitejs/plugin-react
 
 ### Librairies externes (exhaustif)
-- Backend: express, better-sqlite3, zod, jsonwebtoken, bcrypt, cookie-parser, cors, express-rate-limit, express-session, helmet, morgan, multer, nodemailer, socket.io, dotenv, uuid, @faker-js/faker, zxcvbn
+- Backend: express, better-sqlite3, zod, jsonwebtoken, bcrypt, cookie-parser, cors, express-rate-limit, helmet, morgan, multer, nodemailer, socket.io, dotenv, uuid, @faker-js/faker, zxcvbn
 - Frontend: react, react-dom, react-router-dom, react-hook-form, axios, react-toastify, socket.io-client, zxcvbn
 - Dev: nodemon (backend), vite, @vitejs/plugin-react, eslint et plugins, types React
 
