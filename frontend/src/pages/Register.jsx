@@ -2,7 +2,7 @@ import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { registerSchema } from "../../../backend/src/schemas.js";
+import { registerFormSchema } from "../../../backend/src/schemas.js";
 import axios from "axios";
 
 const Register = () => {
@@ -11,7 +11,7 @@ const Register = () => {
 		handleSubmit,
 		formState: { errors, isSubmitting }
 	 } = useForm({
-		resolver: zodResolver(registerSchema),
+		resolver: zodResolver(registerFormSchema),
 		mode: "onChange"
 	 });
 	
@@ -19,7 +19,9 @@ const Register = () => {
 
 	const onSubmit = async (data) => {
 		try {
-			await axios.post("/api/auth/register", data);
+			const { confirmPassword, ...dataToSend } = data;
+
+			await axios.post("/api/auth/register", dataToSend);
 
 			toast.success("Successfully registered! Please check your mailbox.");
 			navigate("/login");
@@ -76,13 +78,18 @@ const Register = () => {
 						<label>Password</label>
 						<input 
 							type="password"
-							{...register("password", { 
-								required: "Password required", 
-								minLength: { value: 8, message: "Min 8 characters" },
-								pattern: { value: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/, message: "Must contain uppercase and lowercase letters, a digit, and a special character" }
-							})} 
+							{...register("password")} 
 						/>
 						{errors.password && <p className="error-msg">{errors.password.message}</p>}
+					</div>
+
+					<div className="input-group">
+						<label>Confirm Password</label>
+						<input 
+							type="password"
+							{...register("confirmPassword")} 
+						/>
+						{errors.confirmPassword && <p className="error-msg">{errors.confirmPassword.message}</p>}
 					</div>
 
 					<button type="submit" className="btn" disabled={isSubmitting}>

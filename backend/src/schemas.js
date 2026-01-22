@@ -25,7 +25,7 @@ export const registerSchema = z.object({
 		.min(8, "Password must be at least 8 characters long")
 		.max(32, "Password must not exceed 32 characters")
 		.regex(/[A-Z]/, "Password must include at least one uppercase letter")
-		.regex(/[0-9]/, "Password must include at least one number")
+		.regex(/[0-9]/, "Password must include at least one digit")
 		.regex(/[^A-Za-z0-9]/, "Password must include at least one special character")
 		.refine((val) => {
 			const result = zxcvbn(val);
@@ -41,6 +41,15 @@ export const registerSchema = z.object({
 	}, { message: "You must be at least 18 years old to join Matcha." }),
 });
 
+export const registerFormSchema = registerSchema
+	.extend({
+		confirmPassword: z.string()
+	})
+	.refine((data) => data.password === data.confirmPassword, {
+		message: "Passwords do not match",
+		path: ["confirmPassword"],
+	});
+
 export const loginSchema = z.object({
 	username: z.string().trim().min(1, "Username is required"),
 	password: z.string().min(1, "Password is required"),
@@ -54,9 +63,14 @@ export const resetPasswordSchema = z.object({
 	token: z.string(),
 	newPassword: z.string()
 		.min(8, "Password must be at least 8 characters long")
-		.regex(/[A-Z]/, "Must include uppercase")
-		.regex(/[0-9]/, "Must include number")
-		.regex(/[^A-Za-z0-9]/, "Must include special char"),
+		.max(32, "Password must not exceed 32 characters")
+		.regex(/[A-Z]/, "Password must include at least one uppercase letter")
+		.regex(/[0-9]/, "Password must include at least one digit")
+		.regex(/[^A-Za-z0-9]/, "Password must include at least one special character")
+		.refine((val) => {
+			const result = zxcvbn(val);
+			return result.score >= 3;
+		}, { message: "Password is too common (e.g., standard dictionary words or sequences)." }),
 });
 
 export const profileSchema = z.object({
