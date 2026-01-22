@@ -168,7 +168,7 @@ router.post("/logout", (req, res) => {
 router.get("/me", (req, res) => {
 	const token = req.cookies.token;
 	if (!token) {
-		return res.status(401).json({ authenticated: false });
+		return res.json({ authenticated: false, user: null });
 	}
 
 	try {
@@ -182,7 +182,7 @@ router.get("/me", (req, res) => {
 		res.json({ authenticated: true, user });
 	
 	} catch (err) {
-		res.status(401).json({ authenticated: false });
+		res.status(401).json({ authenticated: false, user:null });
 	}
 });
 

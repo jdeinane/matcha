@@ -12,7 +12,7 @@ Application de rencontre temps réel (projet `Matcha` de l'école 42) avec profi
 	- React 19, Vite 7, React Router 7, React Hook Form 7
 	- Axios (HTTP), React-Toastify (toasts), Socket.io Client, zxcvbn (force MDP)
 - Backend (Node.js + Express)
-	- Express 5, better-sqlite3 (SQLite), Zod (validation), JWT + cookies HTTP-only
+	- Express 5, better-sqlite3 (SQLite), JWT + cookies HTTP-only
 	- Socket.io (temps réel), Multer (upload), Nodemailer (emails), bcrypt (hash), dotenv
 	- Sécurité: Helmet, CORS, express-rate-limit; Logs: morgan
 - Outils/Dev
