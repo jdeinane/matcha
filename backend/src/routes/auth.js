@@ -112,19 +112,25 @@ router.post("/login", async (req, res) => {
 			return res.status(401).json({ error: "Invalid credentials." });
 		}
 
-		// Verification du compte via email
+		// 3. Verification du compte via email
 		if (user.is_verified === 0) {
 			return res.status(403).json({ error: "Please verify your email first." });
 		}
 
-		// 3. Creation du Token JWT
+		// 4. Pour une 1ere connexion: tant que l'user n'a pas defini ses preferences, sa loca, et sa PP
+		// -> ON le renvoie dans /Settings
+		const hasProfilePic = db.prepare("SELECT id FROM images WHERE user_id = ? AND is_profile_pic = 1").get(user.id);
+		const hasLocation = user.latitude && user.longitude;
+		const isComplete = !!(hasProfilePic && hasLocation);
+
+		// 5. Creation du Token JWT
 		const token = jwt.sign(
 			{ id: user.id, username: user.username },
 			JWT_SECRET,
 			{ expiresIn: "24h" }
 		);
 
-		// 4. Envoi du cookie HTTP-Only (securite max contre XSS)
+		// 6. Envoi du cookie HTTP-Only (securite max contre XSS)
 		res.cookie("token", token, {
 			httpOnly: true,
 			secure: process.env.NODE_ENV === "production",
@@ -132,10 +138,19 @@ router.post("/login", async (req, res) => {
 			maxAge: 24 * 60 * 60 * 1000
 		});
 
-		res.json({ message: "Successfully connected.", user: { id: user.id, username: user.username }});
+		return res.json({ 
+			token, 
+			user: { 
+				id: user.id, 
+				username: user.username,
+				is_complete: isComplete 
+			},
+			message: "Successfully connected."
+		});
 
 	} catch (error) {
-		res.status(400).json({ error: "Invalid data." });
+		console.error(error);
+		res.status(400).json({ error: "Invalid data or server error." });
 	}
 });
 

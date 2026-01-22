@@ -30,6 +30,7 @@ export const AuthProvider = ({ children }) => {
 	const login = async (username, password) => {
 			const res = await axios.post("/api/auth/login", { username, password });
 			setUser(res.data.user);
+			return res.data;
 		};
 
 	const logout = async () => {

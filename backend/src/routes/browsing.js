@@ -49,6 +49,10 @@ router.get("/suggestions", (req, res) => {
 		const me = db.prepare("SELECT * FROM users WHERE id = ?").get(currentUserId);
 		if (!me)
 			return res.status(404).json({ error: "User profile not found. Please login again." });
+		
+		if (!me.gender || !me.sexual_preference) {
+			return res.json([]); 
+		}
 
 		if (!me.latitude || !me.longitude) {
 			me.latitude = 0;
@@ -159,6 +163,10 @@ router.get("/search", (req, res) => {
 		const currentUserId = req.user.id;
 		const me = db.prepare("SELECT latitude, longitude FROM users WHERE id = ?").get(currentUserId);
 
+		if (!me || !me.gender || !me.sexual_preference) {
+			return res.json([]);
+	}
+
 		// On recupere tout le monde (sauf soi et bloques) et on filtre en JS
 		const users = db.prepare(`
 			SELECT u.id, u.username, u.first_name, u.birthdate, u.fame_rating, u.latitude, u.longitude, i.file_path as profile_pic,
@@ -202,8 +210,8 @@ router.get("/search", (req, res) => {
 
 				if (!hasAllTags) return false;
 			}
-            return true;
-        });
+			return true;
+		});
 
 		res.json(filtered);
 

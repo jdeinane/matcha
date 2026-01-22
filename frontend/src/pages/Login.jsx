@@ -10,10 +10,16 @@ const Login = () => {
 
 	const onSubmit = async (data) => {
 		try {
-			await login(data.username, data.password);
+			const response = await login(data.username, data.password);
 
 			toast.success("Successfully logged in!");
-			navigate("/");
+
+			if (response && response.user && response.user.is_complete === false) {
+				toast.info("Please complete your profile first!");
+				navigate("/settings");
+			} else {
+				navigate("/");
+			}
 
 		} catch (error) {
 			const message = error.response?.data?.error || "Login failed";
