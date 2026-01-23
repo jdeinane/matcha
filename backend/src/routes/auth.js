@@ -121,7 +121,13 @@ router.post("/login", async (req, res) => {
 		// -> ON le renvoie dans /Settings
 		const hasProfilePic = db.prepare("SELECT id FROM images WHERE user_id = ? AND is_profile_pic = 1").get(user.id);
 		const hasLocation = user.latitude && user.longitude;
-		const isComplete = !!(hasProfilePic && hasLocation);
+		const isComplete = !!(
+			hasProfilePic && 
+			user.latitude && 
+			user.longitude && 
+			user.gender && 
+			user.sexual_preference
+        );
 
 		// 5. Creation du Token JWT
 		const token = jwt.sign(
@@ -174,15 +180,38 @@ router.get("/me", (req, res) => {
 	try {
 		const decoded = jwt.verify(token, JWT_SECRET);
 
-		const user = db.prepare("SELECT id, username, first_name, last_name, email, is_verified FROM users WHERE id = ?").get(decoded.id);
+		const user = db.prepare(`
+			SELECT id, username, first_name, last_name, email, is_verified, gender, sexual_preference, latitude, longitude 
+			FROM users WHERE id = ?
+        `).get(decoded.id);
+
 		if (!user) {
 			return res.json({ authenticated: false });
 		}
+
+		const hasProfilePic = db.prepare("SELECT id FROM images WHERE user_id = ? AND is_profile_pic = 1").get(user.id);
+		const isComplete = !!(
+			hasProfilePic && 
+			user.latitude && 
+			user.longitude && 
+			user.gender && 
+			user.sexual_preference
+		);
+
+		const userToSend = {
+			id: user.id,
+			username: user.username,
+			first_name: user.first_name,
+			last_name: user.last_name,
+			email: user.email,
+			is_verified: user.is_verified,
+			is_complete: isComplete
+		};
 		
-		res.json({ authenticated: true, user });
+		res.json({ authenticated: true, user: userToSend });
 	
 	} catch (err) {
-		res.json({ authenticated: false, user:null });
+		res.json({ authenticated: false, user: null });
 	}
 });
 

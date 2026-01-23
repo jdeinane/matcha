@@ -10,7 +10,7 @@ const Profile = () => {
 	const [manualCity, setManualCity] = useState("");
 	const [history, setHistory] = useState({ visits: [], likes: [] });
 	const [blockedUsers, setBlockedUsers] = useState([]);
-	const { logout } = useAuth();
+	const { logout, checkAuth } = useAuth();
 
 	// Etats pour les formulaires
 	const [formData, setFormData] = useState({
@@ -144,6 +144,7 @@ const Profile = () => {
 			
 			toast.success("Profile details updated!");
 			fetchProfile();
+			checkAuth();
 
 		} catch (error) {
 			toast.error(error.response?.data?.error || "Error updating profile");
@@ -171,6 +172,7 @@ const Profile = () => {
 			toast.success("Photo uploaded!");
 			setFile(null);
 			fetchProfile();
+			checkAuth();
 
 		} catch (error) {
 			toast.error(error.response?.data?.error || "Upload failed");
@@ -188,6 +190,7 @@ const Profile = () => {
 			
 			toast.success("Photo deleted");
 			fetchProfile();
+			checkAuth();
 
 		} catch (error) {
 			toast.error(error.response?.data?.error || "Error deleting photo");
@@ -205,6 +208,7 @@ const Profile = () => {
 			
 			toast.success("Profile picture updated");
 			fetchProfile();
+			checkAuth();
 
 		} catch (error) {
 			toast.error(error.response?.data?.error || "Error updating profile picture");
@@ -241,6 +245,7 @@ const Profile = () => {
 				setManualCity(normalizedCity);
 				toast.success(`Location updated : ${manualCity}`);
 				fetchProfile();
+				checkAuth();
 			} else {
 				toast.error("City not found");
 			}
@@ -292,6 +297,7 @@ const Profile = () => {
 
 					toast.success(detectedCity ? `Location updated: ${detectedCity}` : "Location updated!");
 					fetchProfile();
+					checkAuth();
 
 				} catch (error) {
 					console.error("Backend error:", error);

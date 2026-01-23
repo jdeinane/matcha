@@ -7,23 +7,23 @@ export const AuthProvider = ({ children }) => {
 	const [user, setUser] = useState(null);
 	const [loading, setLoading] = useState(true);
 
-	useEffect(() => {
-		const checkAuth = async () => {
-			try {
-				const res = await axios.get("/api/auth/me");
+	const checkAuth = async () => {
+		try {
+			const res = await axios.get("/api/auth/me");
 
-				if (res.data.authenticated) {
-					setUser(res.data.user);
-				} else {
-					setUser(null);
-				}
-			} catch (err) {
+			if (res.data.authenticated) {
+				setUser(res.data.user);
+			} else {
 				setUser(null);
-			} finally {
-				setLoading(false);
-			}
-		};
+				}
+		} catch (err) {
+			setUser(null);
+		} finally {
+			setLoading(false);
+		}
+	};
 
+	useEffect(() => {
 		checkAuth();
 	}, []);
 
@@ -67,7 +67,7 @@ export const AuthProvider = ({ children }) => {
 	}
 
 	return (
-		<AuthContext.Provider value={{ user, login, logout, loading, isAuthenticated: !!user }}>
+		<AuthContext.Provider value={{ user, login, logout, loading, isAuthenticated: !!user, checkAuth }}>
 			{children}
 		</AuthContext.Provider>
 	);

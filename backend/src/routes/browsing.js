@@ -50,7 +50,7 @@ router.get("/suggestions", (req, res) => {
 		if (!me)
 			return res.json({ error: "User profile not found. Please login again." });
 		
-		if (!me.gender || !me.sexual_preference || !me.sexual_preference) {
+		if (!me.gender || !me.sexual_preference) {
 			return res.json([]); 
 		}
 
