@@ -25,6 +25,16 @@ const calculateDistance = (lat1, lon1, lat2, lon2) => {
 	return R * c;
 }
 
+/* GET TAGS (For autocomplete) */
+router.get("/tags", (req, res) => {
+	try {
+		const tags = db.prepare("SELECT name FROM tags ORDER BY name ASC").all();
+		res.json(tags.map(t => t.name));
+	} catch (error) {
+		res.json([]);
+	}
+});
+
 /* HELPER: Age calculation */
 const calculateAge = (birthdate) => {
 	if (!birthdate)

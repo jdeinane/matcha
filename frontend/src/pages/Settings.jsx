@@ -10,6 +10,8 @@ const Profile = () => {
 	const [manualCity, setManualCity] = useState("");
 	const [history, setHistory] = useState({ visits: [], likes: [] });
 	const [blockedUsers, setBlockedUsers] = useState([]);
+	const [availableTags, setAvailableTags] = useState([]);
+	const [tagInput, setTagInput] = useState("");
 	const { logout, checkAuth } = useAuth();
 
 	// Etats pour les formulaires
@@ -24,7 +26,38 @@ const Profile = () => {
 	useEffect(() => {
 		fetchProfile();
 		fetchBlockedUsers();
+		fetchTags();
 	}, []);
+
+	const fetchTags = async () => {
+		try {
+			const res = await axios.get("/api/browsing/tags");
+			if (res.data?.success === false || res.data?.error) {
+				toast.error(res.data.error || "Error fetching tags");
+				setAvailableTags([]);
+				return;
+			}
+
+			setAvailableTags(Array.isArray(res.data) ? res.data : []);
+		} catch (err) {
+			toast.error(err.response?.data?.error || "Error fetching tags");
+			setAvailableTags([]);
+		}
+	};
+
+	const addTagFromList = (tagName) => {
+		if (!tagName) return;
+
+		const currentTags = formData.tags.split(',').map(t => t.trim()).filter(Boolean);
+		const cleanTag = tagName.trim().toLowerCase();
+
+		if (!currentTags.includes(cleanTag)) {
+			const newTags = [...currentTags, cleanTag].join(', ');
+			setFormData({ ...formData, tags: newTags });
+			toast.success(`Tag #${cleanTag} added!`);
+        }
+        setTagInput("");
+	};
 
 	const fetchProfile = async () => {
 		try {
@@ -459,65 +492,102 @@ const Profile = () => {
 			</section>
 
 			{/* SECTION 2: BIOGRAPHY & DETAILS */}
-			<section className="settings-section">
-				<h2>The Narrative</h2>
-				<form onSubmit={updateProfile}>
-					<div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '40px' }}>
-						<div className="input-group">
-							<label>Gender Identity</label>
-							<select value={formData.gender} onChange={e => setFormData({...formData, gender: e.target.value})}>
-								<option value="male">Male</option>
-								<option value="female">Female</option>
-								<option value="other">Other</option>
-							</select>
-						</div>
-						<div className="input-group">
-							<label>Orientation</label>
-							<select value={formData.sexual_preference} onChange={e => setFormData({...formData, sexual_preference: e.target.value})}>
-								<option value="heterosexual">Heterosexual</option>
-								<option value="gay">Gay</option>
-								<option value="bisexual">Bisexual</option>
-							</select>
-						</div>
+		<section className="settings-section">
+			<h2>The Narrative</h2>
+			<form onSubmit={updateProfile}>
+				<div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '40px' }}>
+					<div className="input-group">
+						<label>Gender Identity</label>
+						<select value={formData.gender} onChange={e => setFormData({...formData, gender: e.target.value})}>
+							<option value="male">Male</option>
+							<option value="female">Female</option>
+							<option value="other">Other</option>
+						</select>
 					</div>
+					<div className="input-group">
+						<label>Orientation</label>
+						<select value={formData.sexual_preference} onChange={e => setFormData({...formData, sexual_preference: e.target.value})}>
+							<option value="heterosexual">Heterosexual</option>
+							<option value="gay">Gay</option>
+							<option value="bisexual">Bisexual</option>
+						</select>
+					</div>
+				</div>
 
-					<div className="input-group" style={{ marginTop: '30px' }}>
-						<label>Your Story (Biography)</label>
-						<textarea 
-							value={formData.biography} 
-							onChange={e => setFormData({...formData, biography: e.target.value})}
-							rows="4"
-							placeholder="Tell your story..."
+				<div className="input-group" style={{ marginTop: '30px' }}>
+					<label>Your Story (Biography)</label>
+					<textarea 
+						value={formData.biography} 
+						onChange={e => setFormData({...formData, biography: e.target.value})}
+						rows="4"
+						placeholder="Tell your story..."
+					/>
+				</div>
+
+				<div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '40px', marginTop: '30px' }}>
+					
+					<div className="input-group">
+						<label>Interests (tags, comma separated)</label>
+						<input 
+							type="text" 
+							value={formData.tags} 
+							onChange={e => setFormData({...formData, tags: e.target.value})} 
+							placeholder="vegan, art, coffee..."
 						/>
+
+						<div style={{ marginTop: '10px', display: 'flex', gap: '10px', alignItems: 'center' }}>
+							<input
+								list="available-tags-list"
+								type="text"
+								placeholder="Search existing tags..."
+								value={tagInput}
+								onChange={(e) => setTagInput(e.target.value)}
+								onKeyDown={(e) => {
+									if (e.key === 'Enter') {
+										e.preventDefault();
+										addTagFromList(e.target.value);
+									}
+								}}
+								style={{ fontSize: '0.8rem', padding: '8px', border: '1px dashed var(--matcha)', borderRadius: 'var(--radius)', flex: 1 }}
+							/>
+							
+							<datalist id="available-tags-list">
+								{availableTags.map((tag, i) => (
+									<option key={i} value={tag} />
+								))}
+							</datalist>
+
+							<button 
+								type="button" 
+								className="btn"
+								style={{ padding: '8px 15px', fontSize: '0.8rem', background: 'var(--text-main)', color: 'var(--bg-body)' }}
+								onClick={() => addTagFromList(tagInput)}
+							>
+								Add
+							</button>
+						</div>
+						<p style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '5px' }}>
+							Tip: Select a tag from the list and press Enter to add it.
+						</p>
 					</div>
 
-					<div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '40px', marginTop: '30px' }}>
-						<div className="input-group">
-							<label>Interests (tags, comma separated)</label>
-							<input 
-								type="text" 
-								value={formData.tags} 
-								onChange={e => setFormData({...formData, tags: e.target.value})} 
-								placeholder="vegan, art, coffee..."
-							/>
-						</div>
-						<div className="input-group">
-							<label>Birth Date (Verified)</label>
-							<input 
-								type="date" 
-								value={formData.birthdate} 
-								readOnly 
-								disabled
-								style={{ opacity: 0.5, cursor: 'not-allowed' }}
-							/>
-							<p style={{ fontSize: '0.6rem', color: 'var(--text-muted)', marginTop: '5px' }}>
-								Age cannot be changed after registration.
-							</p>
-						</div>
+					<div className="input-group">
+						<label>Birth Date (Verified)</label>
+						<input 
+							type="date" 
+							value={formData.birthdate} 
+							readOnly 
+							disabled
+							style={{ opacity: 0.5, cursor: 'not-allowed' }}
+						/>
+						<p style={{ fontSize: '0.6rem', color: 'var(--text-muted)', marginTop: '5px' }}>
+							Age cannot be changed after registration.
+						</p>
 					</div>
-					<button type="submit" className="btn" style={{ marginTop: '40px' }}>Save Narrative</button>
-				</form>
-			</section>
+				</div>
+				<button type="submit" className="btn" style={{ marginTop: '40px' }}>Save Narrative</button>
+			</form>
+		</section>
 
 			{/* SECTION 3: LOCATION */}
 			<section className="settings-section">
