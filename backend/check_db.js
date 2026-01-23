@@ -13,41 +13,52 @@ try {
 	console.log('\x1b[33m%s\x1b[0m', '📊 1. CHECKING VOLUME (Seed)');
 	const count = db.prepare("SELECT count(*) as total FROM users").get();
 
-    console.log(`   Total number of users: \x1b[1m${count.total}\x1b[0m`);
+	console.log(`   Total number of users: \x1b[1m${count.total}\x1b[0m`);
 
 	if (count.total >= 500) {
-        console.log('   ✅ OK: The seed of 500 users is present.');
-    } else {
-        console.log('   ❌ WARNING: Fewer than 500 users. Missing seed?');
-    }
-    console.log('');
+		console.log('   ✅ OK: The seed of 500 users is present.');
+	} else {
+		console.log('   ❌ WARNING: Fewer than 500 users. Missing seed?');
+	}
+	console.log('');
 
-    // 2. PREUVE DE L'INSCRIPTION MANUELLE (DERNIERS AJOUTS)
-    console.log('\x1b[33m%s\x1b[0m', '📝 2. 10 LAST REGISTERED');
-    console.log('   (IDs > 500 is coherent with the manuals registrations)');
+	// 2. PREUVE DE L'INSCRIPTION MANUELLE (DERNIERS AJOUTS)
+	console.log('\x1b[33m%s\x1b[0m', '📝 2. 10 LAST REGISTERED');
+	console.log('   (IDs > 500 is coherent with the manuals registrations)');
 
-    const recentUsers = db.prepare(`
-        SELECT id, username, email, password_hash, is_verified, created_at
-        FROM users 
-        ORDER BY id DESC 
-        LIMIT 10
-    `).all();
+	const recentUsers = db.prepare(`
+		SELECT id, username, email, password_hash, is_verified, created_at
+		FROM users 
+		ORDER BY id DESC 
+		LIMIT 10
+	`).all();
 
-    // Affichage propre en tableau
-    console.table(recentUsers);
+	// Affichage propre en tableau
+	console.table(recentUsers);
 
-    // 3. PREUVE QUE LE 'REPORT USER' FONCTIONNE
-    console.log('\x1b[33m%s\x1b[0m', '🚨 3. REPORTS');
-    const reports = db.prepare(`
-        SELECT *
-        FROM reports
-    `).all();
+	// 3. PREUVE QUE LE 'REPORT USER' FONCTIONNE
+	console.log('\x1b[33m%s\x1b[0m', '🚨 3. REPORTS');
+	const reports = db.prepare(`
+		SELECT *
+		FROM reports
+	`).all();
 
-    console.table(reports);
+	console.table(reports);
 
+	// 4. AFFICHE LES TAGS EXISTANTS
+	console.log('\x1b[33m%s\x1b[0m', '🏷️ 4. TAGS');
+	const existingTags = db.prepare(`
+		SELECT t.id, t.name, COUNT(ut.user_id) as usage_count
+		FROM tags t
+		LEFT JOIN user_tags ut ON t.id = ut.tag_id
+		GROUP BY t.id, t.name
+		ORDER BY usage_count DESC
+	`).all();
+
+	console.table(existingTags);
 
 } catch (error) {
-    console.error("\x1b[31m%s\x1b[0m", "❌ Error: Unable to read the database.");
-    console.error("   Check you are in the 'backend' folder or that 'matcha.db' exists.");
-    console.error("   Detail: " + error.message);
+	console.error("\x1b[31m%s\x1b[0m", "❌ Error: Unable to read the database.");
+	console.error("   Check you are in the 'backend' folder or that 'matcha.db' exists.");
+	console.error("   Detail: " + error.message);
 }

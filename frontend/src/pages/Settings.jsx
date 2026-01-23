@@ -294,9 +294,9 @@ const Profile = () => {
 			return toast.error("Geolocation is not supported by your browser");
 
 		const options = {
-			enableHighAccuracy: true,
-			timeout: 10000,
-			maximumAge: 0
+			enableHighAccuracy: false,
+			timeout: 45000,
+			maximumAge: 300000
 		};
 
 		navigator.geolocation.getCurrentPosition(

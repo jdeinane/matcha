@@ -6,10 +6,21 @@ export default defineConfig({
 	plugins: [react()],
 	server: {
 		proxy: {
-				'/api': {
+			'/api': {
 				target: 'http://localhost:3000',
 				changeOrigin: true,
-      }
-    }
-  }
+			},
+		},
+	},
+	build: {
+		chunkSizeWarningLimit: 1500,
+		rollupOptions: {
+			output: {
+				manualChunks: {
+					react: ['react', 'react-dom'],
+					socket: ['socket.io-client'],
+				},
+			},
+		},
+	},
 })
