@@ -32,7 +32,9 @@ const runSeed = async () => {
 		"movies",
 		"tech",
 		"art",
-		"cooking"
+		"cooking",
+		"fashion",
+		"video games"
 	];
 	const tagIds = [];
 
@@ -60,8 +62,10 @@ const runSeed = async () => {
 
 		for (let i = 0; i < USERS_COUNT; i++) {
 			const birthdate = faker.date.birthdate({ min: 18, max: 60, mode: 'age' }).toISOString().split('T')[0];
-			const sex = faker.person.sexType();
-			const firstName = faker.person.firstName(sex);
+			const genderOptions = ['male', 'female', 'other'];
+			const sex = faker.helpers.arrayElement(genderOptions);
+			const binarySex = sex === 'other' ? faker.helpers.arrayElement(['male', 'female']) : sex;
+			const firstName = faker.person.firstName(binarySex);
 			const lastName = faker.person.lastName();
 			const username = faker.internet.username({ firstName, lastName }) + Math.floor(Math.random() * 1000);
 			const email = faker.internet.email({ firstName, lastName });
@@ -85,7 +89,7 @@ const runSeed = async () => {
 			);
 			const userId = userResult.lastInsertRowid;
 
-			const genderPath = sex === 'female' ? 'women' : 'men';
+			const genderPath = binarySex === 'female' ? 'women' : 'men';
 			const getPhotoURL = () => {
 				const photoId = faker.number.int({ min: 0, max: 99 });
 				return `https://randomuser.me/api/portraits/${genderPath}/${photoId}.jpg`;
