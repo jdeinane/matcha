@@ -20,6 +20,7 @@ import Search from './pages/Search';
 import Home from './pages/Home';
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
+import Notifications from "./pages/Notifications";
 
 const Footer = () => (
 	<footer style={{ textAlign: 'center', padding: '40px', marginTop: 'auto', fontFamily: 'var(--font-accent)', fontSize: '0.6rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.2em' }}>
@@ -98,6 +99,7 @@ function App() {
 								<Route path="/browse" element={<Browsing />} />
 								<Route path="/search" element={<Search />} />
 								<Route path="/settings" element={<Profile />} />
+								<Route path="/notifications" element={<Notifications />} />
 								<Route path="/user/:id" element={<UserProfile />} />
 								<Route path="/chat" element={<Chat />} />
 								

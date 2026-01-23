@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 
 import { useAuth } from "../context/AuthContext";
@@ -8,12 +8,18 @@ import { useSocket } from "../context/SocketContext";
 const Navbar = () => {
 	const socket = useSocket();
 	const location = useLocation();
+	const navigate = useNavigate();
 	const { user, logout } = useAuth();
 
 	const [unreadCount, setUnreadCount] = useState(0);
 	const [unreadChatCount, setUnreadChatCount] = useState(0);
 	const [showDropdown, setShowDropdown] = useState(false);
 	const [notifications, setNotifications] = useState([]);
+	const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+	useEffect(() => {
+		setIsMobileMenuOpen(false);
+	}, [location]);
 
 	const getMessage = (n) => {
 		switch (n.type) {
@@ -77,6 +83,12 @@ const Navbar = () => {
 	}, [socket]);
 
 	const handleToggleNotifs = async () => {
+		if (window.innerWidth < 768) {
+			setIsMobileMenuOpen(false);
+			navigate("/notifications");
+			return;
+		}
+
 		if (!showDropdown) {
 			try {
 				const res = await axios.get("/api/notifications");
@@ -107,25 +119,34 @@ const Navbar = () => {
 	};
 
 	const iconOnlyStyle = {
-		cursor: 'pointer',
-		color: '#F5F5DC', 
-		display: 'flex',
-		alignItems: 'center',
-		justifyContent: 'center',
-		background: 'none',
-		border: 'none',
-		padding: '0',
-		marginLeft: '25px',
-		fontSize: '1.1rem',
-		transition: 'opacity 0.3s',
-		lineHeight: '1'
-	};
+        cursor: 'pointer',
+        color: '#F5F5DC', 
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: 'none',
+        border: 'none',
+        padding: '0',
+        marginLeft: '25px',
+        fontSize: '1.1rem',
+        transition: 'opacity 0.3s',
+        lineHeight: '1',
+    };
 
 	return (
 		<nav>
 			<Link to="/" className="logo-text">Matcha.</Link>
+
+			<button 
+				className="hamburger" 
+				onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+			>
+				<span></span>
+				<span></span>
+				<span></span>
+			</button>
 			
-			<div style={{ display: 'flex', alignItems: 'center' }}>
+			<div className={`nav-links-container ${isMobileMenuOpen ? 'open' : ''}`}>
 				<Link to="/search" className="nav-link">Search</Link>
 				<Link to="/browse" className="nav-link">Discover</Link>
 				<Link to={`/user/${user.id}`} className="nav-link">Profile</Link>
@@ -136,18 +157,10 @@ const Navbar = () => {
 					)}
 				</Link>
 
-				<div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+				<div className="notifs-wrapper" style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
 					<button 
 						onClick={handleToggleNotifs} 
 						className="nav-item"
-						style={{ 
-							background: 'none', 
-							border: 'none', 
-							padding: 0, 
-							color: '#F5F5DC',
-							display: 'flex',
-							alignItems: 'center'
-						}}
 						>
 						Notifs
 						{unreadCount > 0 && (
@@ -189,7 +202,7 @@ const Navbar = () => {
 					)}
 				</div>
 
-				<Link to="/settings" style={iconOnlyStyle} title="Settings" className="nav-item-icon">
+				<Link to="/settings" title="Settings" className="nav-item-icon">
 					⚙
 				</Link>
 

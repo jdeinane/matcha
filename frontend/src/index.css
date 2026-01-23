@@ -38,7 +38,7 @@ h1 { font-size: 4rem; letter-spacing: -0.02em; line-height: 1; }
 h2 { font-size: 2.8rem; margin-bottom: 1rem; }
 h3 { font-size: 1.8rem; font-style: italic; }
 
-/* --- NAVIGATION --- */
+/* --- NAVIGATION (Base Desktop) --- */
 nav {
   padding: 0.3rem 3rem;
   display: flex;
@@ -61,7 +61,7 @@ nav {
   letter-spacing: -0.02em;
 }
 
-/* Style des liens de la Navbar */
+/* Liens & Boutons de la Navbar */
 nav a:not(.logo-text),
 .nav-item {
   color: var(--bg-body) !important;
@@ -73,11 +73,26 @@ nav a:not(.logo-text),
   margin-left: 25px;
   cursor: pointer;
   transition: opacity 0.3s;
+
+  /* Reset des styles boutons par défaut */
+  background: none;
+  border: none;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 nav a:hover,
 .nav-item:hover {
   opacity: 0.7;
+}
+
+/* Wrapper des notifs (utile pour le dropdown) */
+.notifs-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
 }
 
 /* Badge Notif */
@@ -161,7 +176,7 @@ nav .dropdown-link img {
   letter-spacing: 0.05em !important;
 }
 
-/* --- BOUTONS --- */
+/* --- BOUTONS GÉNÉRIQUES --- */
 .btn {
   display: inline-block;
   padding: 15px 20px;
@@ -266,7 +281,7 @@ input:focus {
   border-bottom-color: var(--text-muted);
 }
 
-/* CHAT */
+/* --- CHAT (Styles de base) --- */
 .chat-wrapper {
     display: flex;
     height: 75vh;
@@ -332,6 +347,10 @@ input:focus {
     font-family: var(--font-heading);
     font-size: 1.5rem;
     font-style: italic;
+    position: sticky;
+    top: 0;
+    background-color: var(--bg-body);
+    z-index: 10;
 }
 
 .messages-container {
@@ -382,7 +401,38 @@ input:focus {
     padding: 5px 0;
 }
 
-/* PROFILE LAYOUT */
+.back-button {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  font-size: 1.8rem;
+  cursor: pointer;
+  color: var(--text-main);
+  padding: 5px;
+  line-height: 1;
+  margin-right: 15px;
+}
+
+/* --- BROWSING PAGE (Styles de base) --- */
+.browsing-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 40px;
+    border-bottom: 1px solid var(--text-main);
+    padding-bottom: 20px;
+    gap: 20px;
+}
+
+.browsing-controls {
+    display: flex;
+    gap: 20px;
+    align-items: flex-end;
+}
+
+/* --- PROFILE LAYOUT --- */
 .profile-layout {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -467,7 +517,7 @@ input:focus {
     margin-right: 8px;
 }
 
-/* SETTINGS */
+/* --- SETTINGS --- */
 .settings-section {
     margin-bottom: 80px;
     padding-top: 40px;
@@ -528,7 +578,7 @@ input:focus {
 
 .photo-btn.delete { color: #ff4444; border-right: 1px solid var(--text-main); }
 
-/* LOGOUT BUTTON */
+/* --- LOGOUT BUTTON --- */
 .btn-logout {
     background-color: transparent !important;
     color: #ff4444 !important;
@@ -542,8 +592,7 @@ input:focus {
     box-shadow: 0 5px 15px rgba(255, 68, 68, 0.2);
 }
 
-/* --- PERSONNALISATION REACT-TOASTIFY --- */
-
+/* --- TOASTIFY --- */
 .Toastify__toast {
     border-radius: var(--radius);
     font-family: var(--font-body);
@@ -551,35 +600,145 @@ input:focus {
     border: 1px solid var(--text-main);
     box-shadow: var(--shadow);
 }
+.Toastify__toast--success { background: var(--matcha) !important; color: var(--bg-body) !important; }
+.Toastify__toast--error { background: #ff4444 !important; color: var(--white) !important; }
+.Toastify__toast--info { background: var(--bg-card) !important; color: var(--text-main) !important; }
+.Toastify__close-button { color: inherit; opacity: 0.7; }
+.Toastify__toast-icon { width: 20px; }
+.Toastify__progress-bar--success { background: var(--bg-body) !important; }
+.Toastify__progress-bar--error { background: var(--white) !important; }
 
-.Toastify__toast--success {
-    background: var(--matcha) !important;
-    color: var(--bg-body) !important;
+/* ================================================================= */
+/* ==================== MOBILE RESPONSIVE ========================== */
+/* ================================================================= */
+
+.nav-links-container {
+  display: flex;
+  align-items: center;
+  transition: all 0.3s ease;
 }
 
-.Toastify__toast--error {
-    background: #ff4444 !important;
-    color: var(--white) !important;
+.hamburger {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 5px;
 }
 
-.Toastify__toast--info {
-    background: var(--bg-card) !important;
-    color: var(--text-main) !important;
+.hamburger span {
+  width: 25px;
+  height: 3px;
+  background-color: var(--bg-body);
+  border-radius: 2px;
+  transition: all 0.3s;
 }
 
-.Toastify__close-button {
-    color: inherit;
-    opacity: 0.7;
-}
+@media (max-width: 768px) {
+  /* --- GENERAL --- */
+  .logo-text { font-size: 1.8rem !important; }
+  nav { padding: 0.5rem 1.5rem; }
+  .grid-container, .profile-layout { grid-template-columns: 1fr; gap: 20px; }
+  .profile-info h1 { font-size: 3rem; }
 
-.Toastify__toast-icon {
-    width: 20px;
-}
+  /* --- NAVIGATION --- */
+  .hamburger { display: flex; }
 
-.Toastify__progress-bar--success {
-    background: var(--bg-body) !important;
-}
+  .nav-links-container {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    background-color: var(--matcha);
+    flex-direction: column;
+    align-items: center;
+    padding: 20px 0;
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    z-index: 999;
+  }
+  
+  .nav-links-container.open {
+    max-height: 500px;
+    opacity: 1;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+  }
 
-.Toastify__progress-bar--error {
-    background: var(--white) !important;
+  .nav-links-container > a, 
+  .nav-links-container > button,
+  .nav-links-container .nav-item {
+    margin: 10px 0 !important;
+    margin-left: 0 !important;
+    width: 100%;
+    text-align: center;
+    justify-content: center;
+    font-size: 1rem;
+    padding: 10px 0;
+  }
+
+  .notifs-wrapper {
+    display: contents;
+  }
+  
+  .nav-icon {
+    font-size: 1.8rem !important;
+    margin-left: 0 !important;
+  }
+
+  /* --- BROWSING --- */
+  .browsing-header {
+      flex-direction: column;
+      align-items: flex-start;
+  }
+  .browsing-title-group h1 { font-size: 2.5rem !important; }
+  .browsing-controls {
+      width: 100%;
+      justify-content: space-between;
+      margin-top: 20px;
+  }
+  .browsing-controls .input-group {
+      flex: 1;
+      max-width: none !important;
+  }
+
+  /* --- CHAT --- */
+  .chat-wrapper {
+    height: calc(100vh - 140px);
+    margin-top: 20px;
+    flex-direction: column;
+  }
+
+  .chat-sidebar {
+    width: 100%;
+    border-right: none;
+    display: flex;
+  }
+  .chat-sidebar.hidden-on-mobile { display: none; }
+
+  .chat-main {
+    width: 100%;
+    display: flex;
+  }
+  .chat-main.hidden-on-mobile { display: none; }
+
+  .back-button {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    margin-right: 15px;
+    background: none;
+    border: none;
+    font-size: 1.8rem;
+    cursor: pointer;
+    color: var(--text-main);
+    padding: 5px;
+    line-height: 1;
+  }
+
+  .desktop-only {
+    display: none !important;
+  }
 }

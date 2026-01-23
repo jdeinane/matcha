@@ -124,7 +124,8 @@ const Chat = () => {
 	return (
 		<div className="container">
 			<div className="chat-wrapper">
-				<div className="chat-sidebar">
+
+				<div className={`chat-sidebar ${selectedUser ? 'hidden-on-mobile' : ''}`}>
 					<h3>Matches</h3>
 					{conversations.length === 0 && <p style={{padding: '25px', color: 'var(--text-muted)', fontStyle: 'italic'}}>No correspondents yet.</p>}
 					{conversations.map(conv => (
@@ -160,11 +161,23 @@ const Chat = () => {
 				</div>
 
 				{/* MAIN WINDOW */}
-				<div className="chat-main">
+				<div className={`chat-main ${!selectedUser ? 'hidden-on-mobile' : ''}`}>
 					{selectedUser ? (
 						<>
 							<div className="chat-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-								<span>Conversation with {selectedUser.first_name}</span>
+								<div style={{ display: 'flex', alignItems: 'center' }}>
+									<button 
+                                        className="back-button" 
+                                        onClick={() => setSelectedUser(null)}
+                                        title="Back to list"
+                                    >
+                                        ←
+                                    </button>
+                                    <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '150px' }}>
+                                        {selectedUser.first_name}
+                                    </span>
+								</div>
+								
 								<Link to={`/user/${selectedUser.id}`} style={{ 
 									fontSize: '0.7rem', 
 									fontFamily: 'var(--font-accent)', 
